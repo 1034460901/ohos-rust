@@ -1,0 +1,792 @@
+--- a/src/bootstrap/bootstrap.py	2026-04-15 03:55:32.000000000 +0800
++++ b/src/bootstrap/bootstrap.py	2026-07-16 14:34:22.822628907 +0800
+@@ -333,12 +333,14 @@
+     # Consider the direct transformation first and then the special cases
+     if kernel in kerneltype_mapper:
+         kernel = kerneltype_mapper[kernel]
+-    elif kernel == "Linux":
++    elif kernel == "Linux" or kernel == "HarmonyOS":
+         # Apple doesn't support `-o` so this can't be used in the combined
+         # uname invocation above
+         ostype = require(["uname", "-o"], exit=required).decode(default_encoding)
+         if ostype == "Android":
+             kernel = "linux-android"
++        elif kernel == "HarmonyOS":
++            kernel = "unknown-linux-ohos"
+         else:
+             python_soabi = sysconfig.get_config_var("SOABI")
+             if python_soabi is not None and "musl" in python_soabi:
+@@ -765,7 +767,7 @@
+                     return False
+                 raise reason
+ 
+-            if ostype != "Linux":
++            if ostype not in ("Linux", "HarmonyOS"):
+                 return False
+ 
+             # If the user has explicitly indicated whether binaries should be
+--- a/src/bootstrap/src/bin/rustc.rs	2026-04-15 03:55:32.000000000 +0800
++++ b/src/bootstrap/src/bin/rustc.rs	2026-07-16 16:46:21.738622657 +0800
+@@ -16,6 +16,7 @@
+ //! never get replaced.
+ 
+ use std::env;
++use std::ffi::OsString;
+ use std::path::{Path, PathBuf};
+ use std::process::{Child, Command};
+ use std::time::Instant;
+@@ -110,6 +111,113 @@
+         }
+     }
+ 
++    let is_test = args.iter().any(|a| a == "--test");
++
++    // When testing std at stage 0, the sysroot contains pre-compiled std
++    // (core, alloc, etc.) from the initial compiler. Building std from source
++    // would create duplicate lang items with the sysroot's pre-compiled
++    // versions. We solve this by swapping out lib.rs with lib.miri.rs for
++    // library builds (not test builds). The lib.miri.rs files re-export the
++    // sysroot crate, avoiding duplicate lang items, while test builds still
++    // use the original lib.rs so tests can access the crate's internals.
++    // This is the same mechanism used by Miri testing.
++    //
++    // Since lib.miri.rs uses `extern crate core as realcore` (etc.), we need
++    // to ensure that the `extern crate` imports resolve to the sysroot's
++    // pre-compiled crates, not the source-built wrappers. We do this by
++    // passing --extern flags pointing to the sysroot's .rlib files for the
++    // specific crates that use lib.miri.rs replacements.
++    //
++    // IMPORTANT: The lib.rs → lib.miri.rs swap must happen BEFORE
++    // cmd.args(&args), because once args are passed to cmd, modifying args
++    // has no effect on the actual command.
++    let replace_librs = env::var_os("STAGE0_REPLACE_LIBRS_IF_NOT_TEST").is_some() && !is_test;
++    if replace_librs {
++        // Swap lib.rs with lib.miri.rs for library builds
++        for arg in &mut args {
++            let path = Path::new(arg);
++            if path.file_name().is_some_and(|f| f == "lib.rs") {
++                let miri_rs = path.with_extension("miri.rs");
++                if path.is_file() && miri_rs.is_file() {
++                    *arg = miri_rs.into_os_string();
++                }
++            }
++        }
++
++        // For std crates using lib.miri.rs wrappers, replace cargo's
++        // --extern paths with sysroot .rmeta paths. The lib.miri.rs
++        // files use `extern crate core as realcore` (etc.) which must
++        // resolve to the sysroot's pre-compiled crates. We replace
++        // cargo's --extern values in args (not append new ones) to
++        // avoid "multiple candidates" errors.
++        let needs_sysroot_extern = crate_name.is_some_and(|name| {
++            matches!(name, "core" | "alloc" | "std" | "compiler_builtins")
++        });
++        if needs_sysroot_extern {
++            let target_triple = parse_value_from_args(&orig_args, "--target");
++            if let Some(triple) = &target_triple {
++                let sysroot_path = PathBuf::from(&sysroot);
++                let sysroot_target_lib = sysroot_path.join("lib").join("rustlib").join(triple).join("lib");
++                if sysroot_target_lib.is_dir() {
++                    // Build a map of crate name -> sysroot .rmeta path
++                    let mut sysroot_rmeta_paths: std::collections::HashMap<&str, PathBuf> =
++                        std::collections::HashMap::new();
++                    for extern_crate in ["core", "alloc", "std", "compiler_builtins"] {
++                        if let Ok(entries) = std::fs::read_dir(&sysroot_target_lib) {
++                            for entry in entries.flatten() {
++                                let path = entry.path();
++                                let fname = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
++                                if fname.starts_with(&format!("lib{extern_crate}-"))
++                                    && fname.ends_with(".rmeta")
++                                {
++                                    sysroot_rmeta_paths.insert(extern_crate, path);
++                                    break;
++                                }
++                            }
++                        }
++                    }
++
++                    // Replace cargo's --extern paths with sysroot .rmeta paths
++                    // Handle both forms: --extern core=/path/... and --extern /path/...
++                    // Collect replacements first to avoid borrow checker conflicts.
++                    let mut replacements: Vec<(usize, OsString)> = Vec::new();
++                    let mut i = 0;
++                    while i < args.len() {
++                        let arg_str = args[i].to_string_lossy().into_owned();
++                        if arg_str == "--extern" && i + 1 < args.len() {
++                            let next_str = args[i + 1].to_string_lossy().into_owned();
++                            for crate_name_str in ["core", "alloc", "std", "compiler_builtins"] {
++                                if let Some(sysroot_path) = sysroot_rmeta_paths.get(crate_name_str) {
++                                    let prefix = format!("{crate_name_str}=");
++                                    if next_str.starts_with(&prefix) {
++                                        replacements.push((i + 1, format!("{crate_name_str}={}", sysroot_path.display()).into()));
++                                    }
++                                }
++                            }
++                            i += 2;
++                        } else if arg_str.starts_with("--extern=") {
++                            for crate_name_str in ["core", "alloc", "std", "compiler_builtins"] {
++                                if let Some(sysroot_path) = sysroot_rmeta_paths.get(crate_name_str) {
++                                    let prefix = format!("--extern={crate_name_str}=");
++                                    if arg_str.starts_with(&prefix) {
++                                        replacements.push((i, format!("--extern={crate_name_str}={}", sysroot_path.display()).into()));
++                                    }
++                                }
++                            }
++                            i += 1;
++                        } else {
++                            i += 1;
++                        }
++                    }
++                    // Apply replacements
++                    for (idx, new_val) in replacements {
++                        args[idx] = new_val;
++                    }
++                }
++            }
++        }
++    }
++
+     let mut cmd = match env::var_os("RUSTC_WRAPPER_REAL") {
+         Some(wrapper) if !wrapper.is_empty() => {
+             let mut cmd = Command::new(wrapper);
+@@ -247,7 +355,6 @@
+         cmd.arg("-Clink-args=-Wl,-q");
+     }
+ 
+-    let is_test = args.iter().any(|a| a == "--test");
+     if verbose > 2 {
+         let rust_env_vars =
+             env::vars().filter(|(k, _)| k.starts_with("RUST") || k.starts_with("CARGO"));
+--- a/src/bootstrap/src/core/build_steps/test.rs	2026-04-15 03:55:32.000000000 +0800
++++ b/src/bootstrap/src/core/build_steps/test.rs	2026-07-16 16:11:53.858623125 +0800
+@@ -3100,14 +3100,26 @@
+             }
+ 
+             // Build `cargo test` command
+-            builder::Cargo::new(
++            let mut cargo = builder::Cargo::new(
+                 builder,
+                 build_compiler,
+                 mode,
+                 SourceType::InTree,
+                 target,
+                 builder.kind,
+-            )
++            );
++
++            // For stage 0, the sysroot contains pre-compiled std from the
++            // initial compiler. Building std from source creates duplicate
++            // lang items. We use the same approach as Miri: swap out lib.rs
++            // with lib.miri.rs for library builds (not test builds). The
++            // lib.miri.rs files re-export the sysroot crate, avoiding
++            // duplicates.
++            if build_compiler.stage == 0 {
++                cargo.env("STAGE0_REPLACE_LIBRS_IF_NOT_TEST", "1");
++            }
++
++            cargo
+         };
+ 
+         match mode {
+--- a/src/stage0	2026-04-15 03:55:32.000000000 +0800
++++ b/src/stage0	2026-07-15 16:25:13.465130000 +0800
+@@ -1,6 +1,6 @@
+-dist_server=https://static.rust-lang.org
+-artifacts_server=https://ci-artifacts.rust-lang.org/rustc-builds
+-artifacts_with_llvm_assertions_server=https://ci-artifacts.rust-lang.org/rustc-builds-alt
++dist_server=https://mirrors.ustc.edu.cn/rust-static
++artifacts_server=https://mirrors.ustc.edu.cn/rust-static/rustc-builds
++artifacts_with_llvm_assertions_server=https://mirrors.ustc.edu.cn/rust-static/rustc-builds-alt
+ git_merge_commit_email=bors@rust-lang.org
+ nightly_branch=main
+ 
+--- a/compiler/rustc_codegen_llvm/src/llvm_util.rs	2026-04-15 03:55:32.000000000 +0800
++++ b/compiler/rustc_codegen_llvm/src/llvm_util.rs	2026-07-17 17:16:52.310530938 +0800
+@@ -438,7 +438,8 @@
+         // (ld is 80-bit extended precision).
+         //
+         // musl does not implement the symbols required for f128 math at all.
+-        _ if *target_env == Env::Musl => false,
++        // OpenHarmony (ohos) uses musl libc and also lacks these symbols.
++        _ if *target_env == Env::Musl || *target_env == Env::Ohos => false,
+         (Arch::X86_64, _) => false,
+         (_, Os::Linux) if target_pointer_width == 64 => true,
+         _ => false,
+--- a/library/std/src/fs/tests.rs	2026-04-15 03:55:32.000000000 +0800
++++ b/library/std/src/fs/tests.rs	2026-07-21 10:46:30.353142031 +0800
+@@ -608,14 +608,20 @@
+ 
+     check!(fs::set_permissions(filename, fs::Permissions::from_mode(0)));
+     let metadata0 = check!(fs::metadata(filename));
++    // hmmac overrides all directory modes to setgid+sticky+rwxrwx--x
++    #[cfg(all(unix, not(target_os = "vxworks"), not(target_env = "ohos")))]
+     assert_eq!(mask & metadata0.permissions().mode(), 0);
++    #[cfg(target_env = "ohos")]
++    assert_eq!(mask & metadata0.permissions().mode(), 0o2771);
+ 
+     check!(fs::set_permissions(filename, fs::Permissions::from_mode(0o1777)));
+     let metadata1 = check!(fs::metadata(filename));
+-    #[cfg(all(unix, not(target_os = "vxworks")))]
++    #[cfg(all(unix, not(target_os = "vxworks"), not(target_env = "ohos")))]
+     assert_eq!(mask & metadata1.permissions().mode(), 0o1777);
+     #[cfg(target_os = "vxworks")]
+     assert_eq!(mask & metadata1.permissions().mode(), 0o0777);
++    #[cfg(target_env = "ohos")]
++    assert_eq!(mask & metadata1.permissions().mode(), 0o2771);
+ }
+ 
+ #[test]
+@@ -1135,6 +1141,9 @@
+ 
+ #[test]
+ fn copy_file_preserves_perm_bits() {
++    #[cfg(unix)]
++    use crate::os::unix::fs::PermissionsExt;
++
+     let tmpdir = tmpdir();
+     let input = tmpdir.join("in.txt");
+     let out = tmpdir.join("out.txt");
+@@ -1144,7 +1153,11 @@
+     p.set_readonly(true);
+     check!(fs::set_permissions(&input, p));
+     check!(fs::copy(&input, &out));
++    // hmmac enforces group write, preventing readonly; verify copy succeeded with hmmac policy applied
++    #[cfg(not(target_env = "ohos"))]
+     assert!(check!(out.metadata()).permissions().readonly());
++    #[cfg(target_env = "ohos")]
++    assert_eq!(check!(out.metadata()).permissions().mode() & 0o777, 0o660);
+     check!(fs::set_permissions(&input, attr.permissions()));
+     check!(fs::set_permissions(&out, attr.permissions()));
+ }
+@@ -1271,6 +1284,7 @@
+ 
+ #[test]
+ #[cfg_attr(target_os = "android", ignore = "Android SELinux rules prevent creating hardlinks")]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support hard links")]
+ fn links_work() {
+     let tmpdir = tmpdir();
+     let input = tmpdir.join("in.txt");
+@@ -1298,6 +1312,9 @@
+ 
+ #[test]
+ fn chmod_works() {
++    #[cfg(unix)]
++    use crate::os::unix::fs::PermissionsExt;
++
+     let tmpdir = tmpdir();
+     let file = tmpdir.join("in.txt");
+ 
+@@ -1308,7 +1325,11 @@
+     p.set_readonly(true);
+     check!(fs::set_permissions(&file, p.clone()));
+     let attr = check!(fs::metadata(&file));
++    // hmmac enforces group write, preventing readonly; verify chmod succeeded and hmmac policy applied
++    #[cfg(not(target_env = "ohos"))]
+     assert!(attr.permissions().readonly());
++    #[cfg(target_env = "ohos")]
++    assert_eq!(attr.permissions().mode() & 0o777, 0o660);
+ 
+     match fs::set_permissions(&tmpdir.join("foo"), p.clone()) {
+         Ok(..) => panic!("wanted an error"),
+@@ -1321,6 +1342,9 @@
+ 
+ #[test]
+ fn fchmod_works() {
++    #[cfg(unix)]
++    use crate::os::unix::fs::PermissionsExt;
++
+     let tmpdir = tmpdir();
+     let path = tmpdir.join("in.txt");
+ 
+@@ -1331,7 +1355,11 @@
+     p.set_readonly(true);
+     check!(file.set_permissions(p.clone()));
+     let attr = check!(fs::metadata(&path));
++    // hmmac enforces group write, preventing readonly; verify fchmod succeeded and hmmac policy applied
++    #[cfg(not(target_env = "ohos"))]
+     assert!(attr.permissions().readonly());
++    #[cfg(target_env = "ohos")]
++    assert_eq!(attr.permissions().mode() & 0o777, 0o660);
+ 
+     p.set_readonly(false);
+     check!(file.set_permissions(p));
+@@ -1767,6 +1795,7 @@
+ /// Test creating hard links to symlinks.
+ #[test]
+ #[cfg_attr(target_os = "android", ignore = "Android SELinux rules prevent creating hardlinks")]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support hard links")]
+ fn symlink_hard_link() {
+     let tmpdir = tmpdir();
+     if !got_symlink_permission(&tmpdir) {
+--- a/library/std/src/os/unix/fs/tests.rs	2026-04-15 03:55:32.000000000 +0800
++++ b/library/std/src/os/unix/fs/tests.rs	2026-07-20 17:00:42.196160780 +0800
+@@ -57,6 +57,7 @@
+ }
+ 
+ #[test]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support mkfifo")]
+ fn test_mkfifo() {
+     let tmp_dir = crate::test_helpers::tmpdir();
+ 
+--- a/library/std/src/os/unix/net/tests.rs	2026-04-15 03:55:32.000000000 +0800
++++ b/library/std/src/os/unix/net/tests.rs	2026-07-20 17:07:40.136156405 +0800
+@@ -24,6 +24,7 @@
+ 
+ #[test]
+ #[cfg_attr(target_os = "android", ignore)] // Android SELinux rules prevent creating Unix sockets
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support Unix socket path binding")]
+ #[cfg_attr(target_os = "vxworks", ignore = "Unix sockets are not implemented in VxWorks")]
+ fn basic() {
+     let dir = tmpdir();
+@@ -98,6 +99,7 @@
+ 
+ #[test]
+ #[cfg_attr(target_os = "android", ignore)] // Android SELinux rules prevent creating Unix sockets
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support Unix socket path binding")]
+ #[cfg_attr(target_os = "vxworks", ignore = "Unix sockets are not implemented in VxWorks")]
+ fn try_clone() {
+     let dir = tmpdir();
+@@ -126,6 +128,7 @@
+ 
+ #[test]
+ #[cfg_attr(target_os = "android", ignore)] // Android SELinux rules prevent creating Unix sockets
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support Unix socket path binding")]
+ #[cfg_attr(target_os = "vxworks", ignore = "Unix sockets are not implemented in VxWorks")]
+ fn iter() {
+     let dir = tmpdir();
+@@ -178,6 +181,7 @@
+ #[test]
+ #[cfg(not(target_os = "nto"))]
+ #[cfg_attr(target_os = "android", ignore)] // Android SELinux rules prevent creating Unix sockets
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support Unix socket path binding")]
+ #[cfg_attr(target_os = "cygwin", ignore)] // Cygwin connect needs handshake
+ #[cfg_attr(target_os = "vxworks", ignore = "Unix sockets are not implemented in VxWorks")]
+ fn timeouts() {
+@@ -208,6 +212,7 @@
+ 
+ #[test]
+ #[cfg_attr(target_os = "android", ignore)] // Android SELinux rules prevent creating Unix sockets
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support Unix socket path binding")]
+ #[cfg_attr(target_os = "cygwin", ignore)] // Cygwin connect needs handshake
+ #[cfg_attr(target_os = "vxworks", ignore = "Unix sockets are not implemented in VxWorks")]
+ fn test_read_timeout() {
+@@ -230,6 +235,7 @@
+ 
+ #[test]
+ #[cfg_attr(target_os = "android", ignore)] // Android SELinux rules prevent creating Unix sockets
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support Unix socket path binding")]
+ #[cfg_attr(target_os = "cygwin", ignore)] // Cygwin connect needs handshake
+ #[cfg_attr(target_os = "vxworks", ignore = "Unix sockets are not implemented in VxWorks")]
+ fn test_read_with_timeout() {
+@@ -260,6 +266,7 @@
+ // when passed zero Durations
+ #[test]
+ #[cfg_attr(target_os = "android", ignore)] // Android SELinux rules prevent creating Unix sockets
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support Unix socket path binding")]
+ #[cfg_attr(target_os = "cygwin", ignore)] // Cygwin connect needs handshake
+ #[cfg_attr(target_os = "vxworks", ignore = "Unix sockets are not implemented in VxWorks")]
+ fn test_unix_stream_timeout_zero_duration() {
+@@ -282,6 +289,7 @@
+ 
+ #[test]
+ #[cfg_attr(target_os = "android", ignore)] // Android SELinux rules prevent creating Unix sockets
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support Unix socket path binding")]
+ #[cfg_attr(target_os = "vxworks", ignore = "Unix sockets are not implemented in VxWorks")]
+ fn test_unix_datagram() {
+     let dir = tmpdir();
+@@ -300,6 +308,7 @@
+ 
+ #[test]
+ #[cfg_attr(target_os = "android", ignore)] // Android SELinux rules prevent creating Unix sockets
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support Unix socket path binding")]
+ #[cfg_attr(target_os = "cygwin", ignore)] // Cygwin autobinds an address
+ #[cfg_attr(target_os = "vxworks", ignore = "Unix sockets are not implemented in VxWorks")]
+ fn test_unnamed_unix_datagram() {
+@@ -320,6 +329,7 @@
+ 
+ #[test]
+ #[cfg_attr(target_os = "android", ignore)] // Android SELinux rules prevent creating Unix sockets
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support Unix socket path binding")]
+ #[cfg_attr(target_os = "vxworks", ignore = "Unix sockets are not implemented in VxWorks")]
+ fn test_unix_datagram_connect_to_recv_addr() {
+     let dir = tmpdir();
+@@ -346,6 +356,7 @@
+ 
+ #[test]
+ #[cfg_attr(target_os = "android", ignore)] // Android SELinux rules prevent creating Unix sockets
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support Unix socket path binding")]
+ #[cfg_attr(target_os = "cygwin", ignore)] // Cygwin autobinds an address
+ #[cfg_attr(target_os = "vxworks", ignore = "Unix sockets are not implemented in VxWorks")]
+ fn test_connect_unix_datagram() {
+@@ -375,6 +386,7 @@
+ 
+ #[test]
+ #[cfg_attr(target_os = "android", ignore)] // Android SELinux rules prevent creating Unix sockets
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support Unix socket path binding")]
+ #[cfg_attr(target_os = "vxworks", ignore = "Unix sockets are not implemented in VxWorks")]
+ fn test_unix_datagram_recv() {
+     let dir = tmpdir();
+@@ -420,6 +432,7 @@
+ // when passed zero Durations
+ #[test]
+ #[cfg_attr(target_os = "android", ignore)] // Android SELinux rules prevent creating Unix sockets
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support Unix socket path binding")]
+ #[cfg_attr(target_os = "vxworks", ignore = "Unix sockets are not implemented in VxWorks")]
+ fn test_unix_datagram_timeout_zero_duration() {
+     let dir = tmpdir();
+@@ -530,6 +543,7 @@
+ #[cfg(any(target_os = "android", target_os = "linux", target_os = "cygwin"))]
+ #[test]
+ #[cfg_attr(target_os = "cygwin", ignore)] // Cygwin cannot bind to abstract addr
++#[cfg_attr(target_env = "ohos", ignore = "ohos kernel abstract socket sender addr differs from Linux")]
+ fn test_abstract_datagram_connect_addr() {
+     let addr1 = or_panic!(SocketAddr::from_abstract_name(b"ns3"));
+     let bsock1 = or_panic!(UnixDatagram::bind_addr(&addr1));
+@@ -579,6 +593,7 @@
+ 
+ #[test]
+ #[cfg_attr(target_os = "android", ignore)] // Android SELinux rules prevent creating Unix sockets
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support Unix socket path binding")]
+ #[cfg_attr(target_os = "vxworks", ignore = "Unix sockets are not implemented in VxWorks")]
+ fn test_unix_stream_peek() {
+     let (txdone, rxdone) = crate::sync::mpsc::channel();
+@@ -613,6 +628,7 @@
+ 
+ #[test]
+ #[cfg_attr(target_os = "android", ignore)] // Android SELinux rules prevent creating Unix sockets
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support Unix socket path binding")]
+ #[cfg_attr(target_os = "vxworks", ignore = "Unix sockets are not implemented in VxWorks")]
+ fn test_unix_datagram_peek() {
+     let dir = tmpdir();
+@@ -639,6 +655,7 @@
+ 
+ #[test]
+ #[cfg_attr(target_os = "android", ignore)] // Android SELinux rules prevent creating Unix sockets
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support Unix socket path binding")]
+ #[cfg_attr(target_os = "vxworks", ignore = "Unix sockets are not implemented in VxWorks")]
+ fn test_unix_datagram_peek_from() {
+     let dir = tmpdir();
+@@ -704,6 +721,7 @@
+ #[cfg(any(target_os = "android", target_os = "linux", target_os = "cygwin"))]
+ #[test]
+ #[cfg_attr(target_os = "android", ignore)] // Android SELinux rules prevent creating Unix sockets
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support Unix socket path binding")]
+ #[cfg_attr(target_os = "cygwin", ignore)] // Cygwin recvmsg doesn't support Unix sockets
+ fn test_send_vectored_with_ancillary_to_unix_datagram() {
+     fn getpid() -> libc::pid_t {
+@@ -773,6 +791,7 @@
+ #[cfg(any(target_os = "android", target_os = "linux"))]
+ #[test]
+ #[cfg_attr(target_os = "android", ignore)] // Android SELinux rules prevent creating Unix sockets
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support Unix socket path binding")]
+ fn test_send_vectored_with_ancillary_unix_datagram() {
+     let dir = tmpdir();
+     let path1 = dir.path().join("sock1");
+--- a/library/std/src/num/f128.rs	2026-04-15 03:55:32.000000000 +0800
++++ b/library/std/src/num/f128.rs	2026-07-17 17:18:05.618530782 +0800
+@@ -35,7 +35,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 2.0_f128;
+     /// let abs_difference = (x.powf(2.0) - (x * x)).abs();
+@@ -66,7 +66,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let one = 1.0f128;
+     /// // e^1
+@@ -98,7 +98,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let f = 2.0f128;
+     ///
+@@ -130,7 +130,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let one = 1.0f128;
+     /// // e^1
+@@ -147,7 +147,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// assert_eq!(0_f128.ln(), f128::NEG_INFINITY);
+     /// assert!((-42_f128).ln().is_nan());
+@@ -179,7 +179,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let five = 5.0f128;
+     ///
+@@ -194,7 +194,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// assert_eq!(0_f128.log(10.0), f128::NEG_INFINITY);
+     /// assert!((-42_f128).log(10.0).is_nan());
+@@ -222,7 +222,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let two = 2.0f128;
+     ///
+@@ -237,7 +237,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// assert_eq!(0_f128.log2(), f128::NEG_INFINITY);
+     /// assert!((-42_f128).log2().is_nan());
+@@ -265,7 +265,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let ten = 10.0f128;
+     ///
+@@ -280,7 +280,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// assert_eq!(0_f128.log10(), f128::NEG_INFINITY);
+     /// assert!((-42_f128).log10().is_nan());
+@@ -310,7 +310,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 8.0f128;
+     ///
+@@ -347,7 +347,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 2.0f128;
+     /// let y = 3.0f128;
+@@ -378,7 +378,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = std::f128::consts::FRAC_PI_2;
+     ///
+@@ -407,7 +407,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 2.0 * std::f128::consts::PI;
+     ///
+@@ -439,7 +439,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = std::f128::consts::FRAC_PI_4;
+     /// let abs_difference = (x.tan() - 1.0).abs();
+@@ -472,7 +472,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let f = std::f128::consts::FRAC_PI_4;
+     ///
+@@ -508,7 +508,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let f = std::f128::consts::FRAC_PI_4;
+     ///
+@@ -543,7 +543,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let f = 1.0f128;
+     ///
+@@ -584,7 +584,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// // Positive angles measured counter-clockwise
+     /// // from positive x axis
+@@ -627,7 +627,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = std::f128::consts::FRAC_PI_4;
+     /// let f = x.sin_cos();
+@@ -663,7 +663,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 1e-8_f128;
+     ///
+@@ -700,7 +700,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 1e-8_f128;
+     ///
+@@ -716,7 +716,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// assert_eq!((-1.0_f128).ln_1p(), f128::NEG_INFINITY);
+     /// assert!((-2.0_f128).ln_1p().is_nan());
+@@ -746,7 +746,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let e = std::f128::consts::E;
+     /// let x = 1.0f128;
+@@ -782,7 +782,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let e = std::f128::consts::E;
+     /// let x = 1.0f128;
+@@ -818,7 +818,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let e = std::f128::consts::E;
+     /// let x = 1.0f128;
+@@ -851,7 +851,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 1.0f128;
+     /// let f = x.sinh().asinh();
+@@ -884,7 +884,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 1.0f128;
+     /// let f = x.cosh().acosh();
+@@ -919,7 +919,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = std::f128::consts::FRAC_PI_6;
+     /// let f = x.tanh().atanh();
+@@ -954,7 +954,7 @@
+     /// #![feature(f128)]
+     /// #![feature(float_gamma)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 5.0f128;
+     ///
+@@ -990,7 +990,7 @@
+     /// #![feature(f128)]
+     /// #![feature(float_gamma)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 2.0f128;
+     ///
+@@ -1026,7 +1026,7 @@
+     /// #![feature(f128)]
+     /// #![feature(float_erf)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     /// /// The error function relates what percent of a normal distribution lies
+     /// /// within `x` standard deviations (scaled by `1/sqrt(2)`).
+     /// fn within_standard_deviations(x: f128) -> f128 {
+@@ -1066,7 +1066,7 @@
+     /// #![feature(f128)]
+     /// #![feature(float_erf)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     /// let x: f128 = 0.123;
+     ///
+     /// let one = x.erf() + x.erfc();
