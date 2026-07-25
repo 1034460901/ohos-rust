@@ -23,6 +23,9 @@ echo "=== 构建 Rust 版本: $RUST_VERSION ==="
 # DRY_RUN: 跳过编译，生成模拟产物测试流程
 DRY_RUN=${DRY_RUN:-false}
 
+# Bootstrap 下载镜像（国内构建可设置为 https://mirrors.ustc.edu.cn/rust-static）
+export RUSTUP_DIST_SERVER=${RUSTUP_DIST_SERVER:-https://static.rust-lang.org}
+
 # 如果存在旧的目录和文件，就清理掉
 rm -rf *.tar.gz \
     *.tgz \
@@ -59,7 +62,28 @@ ls -la "$PATCH_DIR/"
 for PATCH_FILE in "$PATCH_DIR"/*.patch; do
     if [ -f "$PATCH_FILE" ]; then
         echo "应用 patch: $(basename "$PATCH_FILE")"
-        patch -p1 < "$PATCH_FILE"
+        patch -p1 --forward < "$PATCH_FILE"
+    fi
+done
+
+# ========================================
+# 更新 vendored crate checksum
+# ========================================
+# patch 修改了 vendor 目录下的源码，需要重置 .cargo-checksum.json
+# 否则 cargo 会因校验和不匹配而报错
+echo "=== 更新 vendored crate checksums ==="
+for crate in vendor/openssl-probe-0.1.5 vendor/openssl-probe-0.1.6; do
+    checksum_file="$crate/.cargo-checksum.json"
+    if [ -f "$checksum_file" ]; then
+        echo "重置 checksum: $checksum_file"
+        python3 -c "
+import json
+with open('$checksum_file') as f:
+    d = json.load(f)
+d['files'] = {}
+with open('$checksum_file', 'w') as f:
+    json.dump(d, f)
+"
     fi
 done
 
@@ -107,6 +131,11 @@ rust-demangler
 #    rust-analyzer-proc-macro-srv: 宏处理服务进程 (RA 必须组件)。
 #    src:                        标准库源码 (支持 `cargo build-std` 交叉编译)。
 #    rust-demangler:             符号还原工具，用于解析 Panic/Backtrace 中的混淆符号 (如 `_RINv...`)。
+#
+# 3. 代码签名:
+#    通过 patch 0001-rustc-ohos-auto-sign-fix.patch 在 OHOS target spec 中添加
+#    -Wl,--code-sign 预链接参数，编译时由 lld 链接器自动完成签名。
+#    无需在构建后使用 binary-sign-tool 进行签名。
 
 # ========================================
 # 完全模拟官方 CI 的构建步骤
@@ -222,43 +251,6 @@ sh install.sh --prefix="$RUST_INSTALL_DIR" --verbose
 echo "=== 产物位置: $RUST_INSTALL_DIR ==="
 ls -la "$RUST_INSTALL_DIR/" || echo "目录不存在"
 
-echo "=== 复制 OpenSSL 依赖库 ==="
-mkdir -p "$RUST_INSTALL_DIR/lib"
-cp -r /opt/ohos-openssl/prelude/arm64-v8a/lib/* "$RUST_INSTALL_DIR/lib/" 2>/dev/null || true
-
-# 进行代码签名
-echo "=== 代码签名 ==="
-cd "$RUST_INSTALL_DIR"
-
-SIGN_TOOL="/opt/ohos-sdk/linux/toolchains/lib/binary-sign-tool"
-if [ ! -f "$SIGN_TOOL" ]; then
-    echo "✗ 签名工具不存在: $SIGN_TOOL"
-    exit 1
-fi
-
-chmod +x "$SIGN_TOOL"
-echo "使用签名工具: $SIGN_TOOL"
-
-find . -type f | while read -r FILE; do
-    if file -b "$FILE" | grep -qiE "elf"; then
-        echo "Signing: $FILE"
-        ORIG_PERM=$(stat -c %a "$FILE")
-        chmod +w "$FILE"
-
-        SIGNED_TMP="${FILE}.signed"
-        if "$SIGN_TOOL" sign -inFile "$FILE" -outFile "$SIGNED_TMP" -selfSign 1; then
-            mv "$SIGNED_TMP" "$FILE"
-            chmod "$ORIG_PERM" "$FILE"
-        else
-            echo "✗ Failed to sign: $FILE"
-            rm -f "$SIGNED_TMP"
-            exit 1
-        fi
-    fi
-done
-[ $? -ne 0 ] && exit 1
-cd $WORKDIR
-
 # 履行开源义务
 echo "=== 生成 license 文件 ==="
 cat <<EOF > "$RUST_INSTALL_DIR/licenses.txt"
@@ -284,10 +276,6 @@ rm -rf "$FINAL_DIR"
 
 # 直接复制安装目录
 cp -r "$RUST_INSTALL_DIR" "$FINAL_DIR"
-
-# 将签名工具打包进去
-mkdir -p "$FINAL_DIR/tool"
-cp $WORKDIR/tool/binary-sign-tool "$FINAL_DIR/tool/"
 
 tar -zcf rust-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz rust-$RUST_VERSION-aarch64-unknown-linux-ohos
 
@@ -316,27 +304,6 @@ if [ -f "rustc-$RUST_VERSION-src/build/dist/$RA_PACKAGE" ]; then
             cp -r bin/* "$RA_INSTALL_DIR/bin/" 2>/dev/null || true
         fi
         
-        # 签名
-        cd "$RA_INSTALL_DIR"
-        echo "=== 签名 rust-analyzer ==="
-        find . -type f | while read -r FILE; do
-            if file -b "$FILE" | grep -qiE "elf"; then
-                echo "Signing RA: $FILE"
-                ORIG_PERM=$(stat -c %a "$FILE")
-                chmod +w "$FILE"
-                SIGNED_TMP="${FILE}.signed"
-                if "$SIGN_TOOL" sign -inFile "$FILE" -outFile "$SIGNED_TMP" -selfSign 1; then
-                    mv "$SIGNED_TMP" "$FILE"
-                    chmod "$ORIG_PERM" "$FILE"
-                else
-                    echo "✗ Failed to sign RA: $FILE"
-                    rm -f "$SIGNED_TMP"
-                    exit 1
-                fi
-            fi
-        done
-        [ $? -ne 0 ] && exit 1
-        
         # 打包
         cd $WORKDIR
         tar -zcf "$RA_PACKAGE" -C "$RA_INSTALL_DIR" .
@@ -355,6 +322,7 @@ echo "=== 构建完成 ==="
 echo ""
 echo "构建选项汇总:"
 echo "  DRY_RUN: $DRY_RUN"
+echo "  RUSTUP_DIST_SERVER: $RUSTUP_DIST_SERVER"
 echo ""
 echo "产物位置: $WORKDIR/rust-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz"
 ls -lh rust-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz
