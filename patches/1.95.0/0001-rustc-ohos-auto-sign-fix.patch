@@ -1,76 +1,23 @@
-diff --git a/compiler/rustc_codegen_ssa/src/back/link.rs b/compiler/rustc_codegen_ssa/src/back/link.rs
---- a/compiler/rustc_codegen_ssa/src/back/link.rs
-+++ b/compiler/rustc_codegen_ssa/src/back/link.rs
-@@ -6,6 +6,7 @@
- use std::io::{BufReader, BufWriter, Write};
- use std::ops::{ControlFlow, Deref};
- use std::path::{Path, PathBuf};
-+use std::process::Command as StdCommand;
- use std::process::{Output, Stdio};
- use std::{env, fmt, fs, io, mem, str};
- 
-@@ -1063,6 +1064,12 @@ fn link_natively(
-         ab.add_file(temp_filename);
-         ab.build(out_filename);
-     }
-+
-+    // OHOS PATCH BEGIN: Auto re-sign ELF for OpenHarmony
-+    if sess.target.os == rustc_target::spec::Os::Linux && sess.target.env == rustc_target::spec::Env::Ohos {
-+        ohos_auto_resign(sess, out_filename);
-+    }
-+    // OHOS PATCH END
- }
- 
- fn strip_with_external_utility(sess: &Session, util: &str, out_filename: &Path, options: &[&str]) {
-@@ -3434,3 +3441,51 @@ fn warn_if_linked_with_gold(sess: &Session, path: &Path) -> Result<(), Box<dyn s
-     }
-     Ok(())
- }
-+
-+// OHOS PATCH START: Helper function for OpenHarmony auto-signing
-+fn ohos_auto_resign(sess: &Session, out_filename: &Path) {
-+    let sign_tool = match std::env::var("OHOS_BINARY_SIGN_TOOL") {
-+        Ok(path) => path,
-+        Err(_) => {
-+            sess.dcx().warn(
-+                "[OhOS Auto-Sign] OHOS_BINARY_SIGN_TOOL env var not set. Skipping signing."
-+            );
-+            return;
-+        }
+diff --git a/compiler/rustc_target/src/spec/base/linux_ohos.rs b/compiler/rustc_target/src/spec/base/linux_ohos.rs
+--- a/compiler/rustc_target/src/spec/base/linux_ohos.rs
++++ b/compiler/rustc_target/src/spec/base/linux_ohos.rs
+@@ -1,11 +1,16 @@
+-use crate::spec::{Env, TargetOptions, TlsModel, base};
++use crate::spec::{Cc, Env, LinkerFlavor, Lld, TargetOptions, TlsModel, base};
+
+ pub(crate) fn opts() -> TargetOptions {
+-    TargetOptions {
++    let mut opts = TargetOptions {
+         env: Env::Ohos,
+         crt_static_default: false,
+         tls_model: TlsModel::Emulated,
+         has_thread_local: false,
+         ..base::linux::opts()
+-    }
 +    };
-+
-+    let tmp_signed = out_filename.with_extension("elf.signed_tmp");
-+
-+    let status = StdCommand::new(&sign_tool)
-+        .arg("sign")
-+        .arg("-inFile").arg(out_filename)
-+        .arg("-outFile").arg(&tmp_signed)
-+        .arg("-selfSign").arg("1")
-+        .status();
-+
-+    match status {
-+        Ok(s) if s.success() => {
-+            if std::fs::rename(&tmp_signed, out_filename).is_err() {
-+                let _ = std::fs::copy(&tmp_signed, out_filename);
-+                let _ = std::fs::remove_file(&tmp_signed);
-+            }
-+
-+            #[cfg(unix)]
-+            {
-+                use std::os::unix::fs::PermissionsExt;
-+                if let Ok(meta) = std::fs::metadata(out_filename) {
-+                    let mut perms = meta.permissions();
-+                    perms.set_mode(perms.mode() | 0o755);
-+                    let _ = std::fs::set_permissions(out_filename, perms);
-+                }
-+            }
-+
-+            sess.dcx().note(format!("[OhOS Auto-Sign] Signed: {}", out_filename.display()));
-+        }
-+        _ => {
-+            sess.dcx().warn(format!("[OhOS Auto-Sign] Failed to sign: {}", out_filename.display()));
-+            let _ = std::fs::remove_file(&tmp_signed);
-+        }
-+    }
-+}
-+// OHOS PATCH END
++    opts.add_pre_link_args(
++        LinkerFlavor::Gnu(Cc::Yes, Lld::No),
++        &["-Wl,--code-sign"],
++    );
++    opts
+ }
