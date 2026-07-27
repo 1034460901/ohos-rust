@@ -777,7 +777,8 @@
 +    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
      /// let x: f128 = 0.123;
      ///
-     /// let one = x.erf() + x.erfc();--- a/src/bootstrap/src/core/build_steps/doc.rs
+     /// let one = x.erf() + x.erfc();
+--- a/src/bootstrap/src/core/build_steps/doc.rs
 +++ b/src/bootstrap/src/core/build_steps/doc.rs
 @@ -1239,6 +1239,10 @@ impl Step for ErrorIndex {
      }
