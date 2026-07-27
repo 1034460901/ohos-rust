@@ -23,60 +23,154 @@ echo "=== 构建 Rust 版本: $RUST_VERSION ==="
 # DRY_RUN: 跳过编译，生成模拟产物测试流程
 DRY_RUN=${DRY_RUN:-false}
 
-# Bootstrap 下载镜像（国内构建可设置为 https://mirrors.ustc.edu.cn/rust-static）
-export RUSTUP_DIST_SERVER=${RUSTUP_DIST_SERVER:-https://static.rust-lang.org}
+# CLEAN_BUILD: 完全清理后重新构建（Docker/CI 场景使用）
+# 默认 false，保留源码和编译缓存，支持增量编译
+CLEAN_BUILD=${CLEAN_BUILD:-false}
 
-# 如果存在旧的目录和文件，就清理掉
-rm -rf *.tar.gz \
-    *.tgz \
-    deps \
-    rustc-* \
-    rust-$RUST_VERSION-ohos-arm64
+# Bootstrap 下载镜像（与 0003 patch 中 src/stage0 的 USTC 镜像保持一致）
+export RUSTUP_DIST_SERVER=${RUSTUP_DIST_SERVER:-https://mirrors.ustc.edu.cn/rust-static}
 
 # ========================================
-# 下载 Rust 源码
+# 本地环境检测与设置
 # ========================================
-echo "=== 下载 Rust 源码 ==="
-curl -fLO https://static.rust-lang.org/dist/rustc-$RUST_VERSION-src.tar.gz
-tar -zxf rustc-$RUST_VERSION-src.tar.gz
-cd rustc-$RUST_VERSION-src
+# Docker 构建时环境已由 Dockerfile 设置好，本地构建时自动检测并补全
+SDK_DIR=${SDK_DIR:-/opt/ohos-sdk}
+OPENSSL_DIR=${OPENSSL_DIR:-/opt/ohos-openssl/prelude/arm64-v8a}
+CLANG_WRAPPER_DIR=/usr/local/bin
+
+if [ ! -d "$SDK_DIR/native" ]; then
+    if [ -f "$WORKDIR/x86_64/scripts/ohos-sdk.sh" ]; then
+        echo "=== 设置 OHOS SDK ==="
+        sh "$WORKDIR/x86_64/scripts/ohos-sdk.sh"
+    else
+        echo "错误: OHOS SDK 未安装 ($SDK_DIR/native 不存在)"
+        echo "请先运行 x86_64/scripts/ohos-sdk.sh 或通过 Docker 构建"
+        exit 1
+    fi
+fi
+
+if [ ! -f "$OPENSSL_DIR/lib/libssl.a" ]; then
+    if [ -f "$WORKDIR/x86_64/scripts/ohos-openssl.sh" ]; then
+        echo "=== 构建 OHOS OpenSSL ==="
+        # 先确保 clang wrapper 存在
+        if [ ! -f "$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang.sh" ]; then
+            cp "$WORKDIR/x86_64/scripts/ohos/aarch64-unknown-linux-ohos-clang.sh" "$CLANG_WRAPPER_DIR/"
+            cp "$WORKDIR/x86_64/scripts/ohos/aarch64-unknown-linux-ohos-clang++.sh" "$CLANG_WRAPPER_DIR/"
+            chmod +x "$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang.sh" "$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang++.sh"
+        fi
+        sh "$WORKDIR/x86_64/scripts/ohos-openssl.sh"
+    else
+        echo "错误: OHOS OpenSSL 未构建 ($OPENSSL_DIR/lib/libssl.a 不存在)"
+        echo "请先运行 x86_64/scripts/ohos-openssl.sh 或通过 Docker 构建"
+        exit 1
+    fi
+fi
+
+# 确保 clang wrapper 存在
+if [ ! -f "$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang.sh" ]; then
+    cp "$WORKDIR/x86_64/scripts/ohos/aarch64-unknown-linux-ohos-clang.sh" "$CLANG_WRAPPER_DIR/"
+    cp "$WORKDIR/x86_64/scripts/ohos/aarch64-unknown-linux-ohos-clang++.sh" "$CLANG_WRAPPER_DIR/"
+    chmod +x "$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang.sh" "$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang++.sh"
+fi
+
+# 设置交叉编译环境变量
+export TARGETS=${TARGETS:-aarch64-unknown-linux-ohos}
+export CC_aarch64_unknown_linux_ohos="$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang.sh"
+export CXX_aarch64_unknown_linux_ohos="$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang++.sh"
+export AR_aarch64_unknown_linux_ohos="$SDK_DIR/native/llvm/bin/llvm-ar"
+export AARCH64_UNKNOWN_LINUX_OHOS_OPENSSL_DIR="$OPENSSL_DIR"
+export AARCH64_UNKNOWN_LINUX_OHOS_OPENSSL_NO_VENDOR=1
+export AARCH64_UNKNOWN_LINUX_OHOS_OPENSSL_STATIC=1
+export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_OHOS_LINKER="$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang.sh"
 
 # ========================================
-# 应用 patches
+# 缓存配置（sccache + ccache）
 # ========================================
-echo "=== 应用 patches ==="
+# sccache: C/C++ 编译缓存（通过 --enable-sccache 启用，bootstrap 自动设置 build.ccache=sccache）
+# 注意: 不设置 RUSTC_WRAPPER=sccache，因为 sccache 不支持自定义构建的 stage2 rustc
+# --enable-sccache 已在 bootstrap.toml 中设置 build.ccache=sccache 用于 C/C++ 编译缓存
+export SCCACHE_DIR=${SCCACHE_DIR:-$WORKDIR/.sccache}
+export SCCACHE_IDLE_TIMEOUT=${SCCACHE_IDLE_TIMEOUT:-10800}
+mkdir -p "$SCCACHE_DIR"
 
+# ccache: C/C++ 编译缓存（LLVM 等原生代码编译）
+export CCACHE_DIR=${CCACHE_DIR:-$WORKDIR/.ccache}
+mkdir -p "$CCACHE_DIR"
+ccache --set-config=max_size=5G 2>/dev/null || true
+ccache --set-config=compression=true 2>/dev/null || true
+
+# 网络重试配置（加速 cargo vendor 等网络操作）
+export CARGO_NET_RETRY=${CARGO_NET_RETRY:-10}
+export CARGO_NET_TIMEOUT=${CARGO_NET_TIMEOUT:-120}
+
+# ========================================
+# 目录定义
+# ========================================
+SRC_DIR="$WORKDIR/rustc-$RUST_VERSION-src"
 PATCH_DIR="$WORKDIR/patches/$RUST_VERSION"
+PATCH_MARKER="$SRC_DIR/.patches-applied"
 
+# ========================================
+# 清理策略
+# ========================================
+# 始终清理输出产物
+rm -f "$WORKDIR"/rust-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz
+rm -rf "$WORKDIR/rust-$RUST_VERSION-aarch64-unknown-linux-ohos"
+
+# CLEAN_BUILD=true 时完全清理源码和编译缓存
+if [ "$CLEAN_BUILD" = "true" ]; then
+    echo "=== 完全清理 (CLEAN_BUILD=true) ==="
+    rm -rf "$SRC_DIR"
+    rm -f "$WORKDIR"/rustc-$RUST_VERSION-src.tar.gz
+fi
+
+# ========================================
+# 下载 Rust 源码（已存在则跳过）
+# ========================================
+if [ ! -d "$SRC_DIR" ]; then
+    echo "=== 下载 Rust 源码 ==="
+    if [ ! -f "$WORKDIR/rustc-$RUST_VERSION-src.tar.gz" ]; then
+        curl -fLO "https://mirrors.ustc.edu.cn/rust-static/dist/rustc-$RUST_VERSION-src.tar.gz"
+    fi
+    tar -zxf "rustc-$RUST_VERSION-src.tar.gz" -C "$WORKDIR"
+else
+    echo "=== 源码已存在，跳过下载: $SRC_DIR ==="
+fi
+
+cd "$SRC_DIR"
+
+# ========================================
+# 应用 patches（已应用则跳过）
+# ========================================
 if [ ! -d "$PATCH_DIR" ]; then
     echo "错误: 未找到版本 $RUST_VERSION 的 patches 目录"
     echo "请创建目录: patches/$RUST_VERSION/"
     echo "当前支持的版本:"
-    ls -d "$WORKDIR/patches/*/ " 2>/dev/null || echo "  (无)"
+    ls -d "$WORKDIR"/patches/*/ 2>/dev/null || echo "  (无)"
     exit 1
 fi
 
-echo "Patches 目录: $PATCH_DIR"
-ls -la "$PATCH_DIR/"
+if [ ! -f "$PATCH_MARKER" ]; then
+    echo "=== 应用 patches ==="
+    echo "Patches 目录: $PATCH_DIR"
+    ls -la "$PATCH_DIR/"
 
-for PATCH_FILE in "$PATCH_DIR"/*.patch; do
-    if [ -f "$PATCH_FILE" ]; then
-        echo "应用 patch: $(basename "$PATCH_FILE")"
-        patch -p1 --forward < "$PATCH_FILE"
-    fi
-done
+    for PATCH_FILE in "$PATCH_DIR"/*.patch; do
+        if [ -f "$PATCH_FILE" ]; then
+            echo "应用 patch: $(basename "$PATCH_FILE")"
+            patch -p1 --forward < "$PATCH_FILE"
+        fi
+    done
 
-# ========================================
-# 更新 vendored crate checksum
-# ========================================
-# patch 修改了 vendor 目录下的源码，需要重置 .cargo-checksum.json
-# 否则 cargo 会因校验和不匹配而报错
-echo "=== 更新 vendored crate checksums ==="
-for crate in vendor/openssl-probe-0.1.5 vendor/openssl-probe-0.1.6; do
-    checksum_file="$crate/.cargo-checksum.json"
-    if [ -f "$checksum_file" ]; then
-        echo "重置 checksum: $checksum_file"
-        python3 -c "
+    # 更新 vendored crate checksum
+    # patch 修改了 vendor 目录下的源码，需要重置 .cargo-checksum.json
+    # 否则 cargo 会因校验和不匹配而报错
+    echo "=== 更新 vendored crate checksums ==="
+    for crate in vendor/openssl-probe-0.1.5 vendor/openssl-probe-0.1.6; do
+        checksum_file="$crate/.cargo-checksum.json"
+        if [ -f "$checksum_file" ]; then
+            echo "重置 checksum: $checksum_file"
+            python3 -c "
 import json
 with open('$checksum_file') as f:
     d = json.load(f)
@@ -84,21 +178,29 @@ d['files'] = {}
 with open('$checksum_file', 'w') as f:
     json.dump(d, f)
 "
-    fi
-done
+        fi
+    done
+
+    touch "$PATCH_MARKER"
+    echo "=== Patches 应用完成 ==="
+else
+    echo "=== Patches 已应用（标记文件存在），跳过 ==="
+fi
 
 # ========================================
-# 完全模拟官方 CI 的 configure 步骤
-# 参考：src/ci/docker/host-x86_64/dist-ohos-aarch64/Dockerfile
+# 配置 Rust 构建
 # ========================================
+# 参考：src/ci/docker/host-x86_64/dist-ohos-aarch64/Dockerfile
 echo "=== 配置 Rust 构建 ==="
+rm -f bootstrap.toml
 ./configure \
     --enable-profiler \
     --enable-sanitizers \
     --enable-extended \
     --enable-cargo-native-static \
-    --disable-docs \
     --set rust.rpath=true \
+    --enable-sccache \
+    --set dist.vendor=false \
     \
     --tools=\
 cargo,\
@@ -108,53 +210,24 @@ rustfmt,\
 rust-analyzer,\
 rust-analyzer-proc-macro-srv,\
 src,\
-rust-demangler
-
-# === 参数详细说明 ===
-# 目标：构建 OHOS 交叉编译工具链（在 x86_64 上编译，产物为 aarch64）
-#
-# 1. 构建特性控制:
-#    --enable-extended:          构建扩展工具链（不仅是编译器，还包括 Cargo、Stdlib 等）。
-#    --enable-profiler:          启用性能分析工具支持 (perf)。
-#    --enable-sanitizers:        启用内存/线程错误检查器 (ASAN/LSAN 等)。
-#    --enable-cargo-native-static: 尝试静态链接 Cargo 的原生依赖（如 OpenSSL），减少产物依赖。
-#    --disable-docs:             禁用文档生成。交叉编译时 host 工具（如 error_index_generator）
-#                               编译为 aarch64 格式，无法在 x86_64 上运行生成文档。
-#    --set rust.rpath=true:      设置运行时库搜索路径，确保二进制能正确找到动态库。
-#
-# 2. 工具组件列表 (--tools) - 对齐标准发行版:
-#    cargo:                      包管理器 (必选)。
-#    clippy:                     静态代码分析工具。
-#    rustdoc:                    文档生成工具 (支持 `cargo doc`)。
-#    rustfmt:                    代码格式化工具。
-#    rust-analyzer:              IDE 语言服务器核心。
-#    rust-analyzer-proc-macro-srv: 宏处理服务进程 (RA 必须组件)。
-#    src:                        标准库源码 (支持 `cargo build-std` 交叉编译)。
-#    rust-demangler:             符号还原工具，用于解析 Panic/Backtrace 中的混淆符号 (如 `_RINv...`)。
-#
-# 3. 代码签名:
-#    通过 patch 0001-rustc-ohos-auto-sign-fix.patch 在 OHOS target spec 中添加
-#    -Wl,--code-sign 预链接参数，编译时由 lld 链接器自动完成签名。
-#    无需在构建后使用 binary-sign-tool 进行签名。
+rust-demangler,\
+llvm-tools,\
+miri
 
 # ========================================
-# 完全模拟官方 CI 的构建步骤
-# 参考：src/ci/docker/host-x86_64/dist-ohos-aarch64/Dockerfile
+# 构建步骤
 # ========================================
 
 if [ "$DRY_RUN" = "true" ]; then
     echo ">>> [DRY RUN MODE] 跳过编译，生成模拟产物"
     
-    # DRY RUN 逻辑：生成模拟文件
     cd $WORKDIR
     
-    # 关键修复：必须显式创建 build/dist 目录，因为 x.py dist 被跳过了
-    BUILD_DIST="$WORKDIR/rustc-$RUST_VERSION-src/build/dist"
+    BUILD_DIST="$SRC_DIR/build/dist"
     MOCK_DIR="$BUILD_DIST/mock-install"
     TARGET_NAME="rust-$RUST_VERSION-aarch64-unknown-linux-ohos"
     TARGET_DIR="$BUILD_DIST/$TARGET_NAME"
 
-    # 清理旧目录
     rm -rf "$MOCK_DIR" "$TARGET_DIR"
 
     echo "创建目录: $MOCK_DIR"
@@ -172,20 +245,16 @@ if [ "$DRY_RUN" = "true" ]; then
     cp /bin/ls "$MOCK_DIR/lib/rustlib/aarch64-unknown-linux-ohos/bin/rust-lld"
 
     echo "打包模拟产物..."
-    # 重命名目录
     mv "$MOCK_DIR" "$TARGET_DIR"
 
-    # 生成模拟 install.sh
-    cat > "$TARGET_DIR/install.sh" << 'EOF'
+    cat > "$TARGET_DIR/install.sh" << 'MOCK_EOF'
 #!/bin/sh
-# 模拟安装脚本，将 bin/lib 目录拷贝到 --prefix 指定的位置
 PREFIX=""
 for arg in "$@"; do
     case "$arg" in
         --prefix=*) PREFIX="${arg#*=}" ;;
     esac
 done
-
 if [ -n "$PREFIX" ]; then
     echo "Mock installing to $PREFIX..."
     mkdir -p "$PREFIX/bin" "$PREFIX/lib"
@@ -193,10 +262,9 @@ if [ -n "$PREFIX" ]; then
     cp -r lib/* "$PREFIX/lib/" 2>/dev/null || true
     echo "Mock installation complete."
 fi
-EOF
+MOCK_EOF
     chmod +x "$TARGET_DIR/install.sh"
 
-    # 打包
     cd "$BUILD_DIST"
     tar -czf "$TARGET_NAME.tar.gz" "$TARGET_NAME"
     ls -lh "$TARGET_NAME.tar.gz"
@@ -204,23 +272,22 @@ EOF
     
     echo "模拟产物已生成"
 else
-    echo ">>> [FULL BUILD MODE] 执行真实编译"
+    echo ">>> [FULL BUILD MODE] 执行编译"
 
-    # 步骤 1: 跳过 make prepare（OHOS 不是官方支持的平台）
-    # make prepare  # OHOS 没有官方预构建工具链，跳过此步骤
-
-    # 步骤 2: 启动 sccache
+    # 启动 sccache（如可用，用于 C/C++ 编译缓存）
     echo "=== 启动 sccache 服务器 ==="
-    SCCACHE_IDLE_TIMEOUT=10800 sccache --start-server || true
+    SCCACHE_IDLE_TIMEOUT=10800 sccache --start-server 2>/dev/null || echo "sccache 不可用，跳过"
 
-    # 步骤 3: 运行构建脚本
-    echo "=== 运行官方构建脚本 ==="
-    echo "=== SCRIPT: python3 ../x.py dist --host=$TARGETS --target $TARGETS ==="
+    # 运行构建（增量编译：保留 build/ 目录可复用 LLVM 等编译缓存）
+    echo "=== 运行构建脚本 ==="
+    echo "=== SCRIPT: python3 x.py dist --host=$TARGETS --target $TARGETS ==="
     python3 x.py dist --host=$TARGETS --target $TARGETS -j$(nproc)
 
-    # 步骤 4: 显示 sccache 统计信息
-    echo "=== 显示 sccache 统计信息 ==="
-    sccache --show-adv-stats || true
+    # 显示 sccache 统计信息
+    echo "=== sccache 统计 ==="
+    sccache --show-adv-stats 2>/dev/null || true
+    echo "=== ccache 统计 ==="
+    ccache --show-stats 2>/dev/null || true
 fi
 
 cd $WORKDIR
@@ -230,28 +297,58 @@ cd $WORKDIR
 # ========================================
 echo "=== 提取 Rust 分发包 ==="
 echo "=== 检查构建产物 ==="
-ls -la rustc-$RUST_VERSION-src/build/dist/ || echo "dist 目录不存在"
+ls -la "$SRC_DIR/build/dist/" || echo "dist 目录不存在"
 echo "=== 查找 tar.gz 文件 ==="
-find rustc-$RUST_VERSION-src/build/dist/ -name "*.tar.gz" || echo "没有找到 tar.gz 文件"
+find "$SRC_DIR/build/dist/" -name "*.tar.gz" || echo "没有找到 tar.gz 文件"
 
-# 调用 install.sh 安装到临时目录
+# 安装到临时目录
 echo "RUST_INSTALL_DIR=/tmp/rust-install"
 export RUST_INSTALL_DIR="/tmp/rust-install"
 rm -rf "$RUST_INSTALL_DIR"
 mkdir -p "$RUST_INSTALL_DIR"
 
 echo "===RUST_INSTALL_DIR 安装 rustc ==="
-cd rustc-$RUST_VERSION-src/build/dist/
-tar -zxf rust-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz
-cd rust-$RUST_VERSION-aarch64-unknown-linux-ohos
+cd "$SRC_DIR/build/dist/"
+tar -zxf "rust-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz"
+cd "rust-$RUST_VERSION-aarch64-unknown-linux-ohos"
 
-# 直接安装到指定路径（扁平结构）
 sh install.sh --prefix="$RUST_INSTALL_DIR" --verbose
+
+# ========================================
+# 安装附加组件包
+# ========================================
+echo "=== 安装附加组件包 ==="
+for PKG_TGZ in \
+    "rust-src-$RUST_VERSION.tar.gz" \
+    "rust-docs-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz" \
+    "llvm-tools-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz" \
+    "miri-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz"
+do
+    PKG_NAME="${PKG_TGZ%.tar.gz}"
+    if [ -f "$SRC_DIR/build/dist/$PKG_TGZ" ]; then
+        echo "--- 安装: $PKG_TGZ ---"
+        rm -rf "/tmp/extra-pkg-install"
+        mkdir -p "/tmp/extra-pkg-install"
+        cd "$SRC_DIR/build/dist/"
+        tar -zxf "$PKG_TGZ"
+        cd "$PKG_NAME"
+        if [ -f "install.sh" ]; then
+            sh install.sh --prefix="$RUST_INSTALL_DIR" --verbose
+        else
+            cp -r . "$RUST_INSTALL_DIR/" 2>/dev/null || true
+        fi
+        cd "$SRC_DIR/build/dist/"
+        rm -rf "$PKG_NAME"
+        echo "--- $PKG_TGZ 安装完成 ---"
+    else
+        echo "--- 跳过 (未找到): $PKG_TGZ ---"
+    fi
+done
 
 echo "=== 产物位置: $RUST_INSTALL_DIR ==="
 ls -la "$RUST_INSTALL_DIR/" || echo "目录不存在"
 
-# 履行开源义务
+# 生成 license 文件
 echo "=== 生成 license 文件 ==="
 cat <<EOF > "$RUST_INSTALL_DIR/licenses.txt"
 This document describes the licenses of all software distributed with the
@@ -260,8 +357,8 @@ bundled application.
 
 rust
 ==========
-$(cat rustc-$RUST_VERSION-src/LICENSE-MIT)
-$(cat rustc-$RUST_VERSION-src/LICENSE-APACHE)
+$(cat "$SRC_DIR/LICENSE-MIT")
+$(cat "$SRC_DIR/LICENSE-APACHE")
 
 ohos-openssl
 ==========
@@ -271,40 +368,35 @@ EOF
 
 # 打包最终产物
 echo "=== 打包最终产物 ==="
+cd "$WORKDIR"
 FINAL_DIR="$WORKDIR/rust-$RUST_VERSION-aarch64-unknown-linux-ohos"
 rm -rf "$FINAL_DIR"
-
-# 直接复制安装目录
 cp -r "$RUST_INSTALL_DIR" "$FINAL_DIR"
 
-tar -zcf rust-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz rust-$RUST_VERSION-aarch64-unknown-linux-ohos
+tar -zcf "rust-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz" "rust-$RUST_VERSION-aarch64-unknown-linux-ohos"
 
 # ========================================
 # 处理 rust-analyzer 独立包
 # ========================================
 echo "=== 处理 rust-analyzer 独立包 ==="
 RA_PACKAGE="rust-analyzer-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz"
-if [ -f "rustc-$RUST_VERSION-src/build/dist/$RA_PACKAGE" ]; then
+if [ -f "$SRC_DIR/build/dist/$RA_PACKAGE" ]; then
     RA_INSTALL_DIR="/tmp/rust-analyzer-install"
     rm -rf "$RA_INSTALL_DIR"
     mkdir -p "$RA_INSTALL_DIR"
 
-    cd rustc-$RUST_VERSION-src/build/dist/
+    cd "$SRC_DIR/build/dist/"
     tar -zxf "$RA_PACKAGE"
-    # 进入解压后的目录
     if [ -d "rust-analyzer-$RUST_VERSION-aarch64-unknown-linux-ohos" ]; then
-        cd rust-analyzer-$RUST_VERSION-aarch64-unknown-linux-ohos
+        cd "rust-analyzer-$RUST_VERSION-aarch64-unknown-linux-ohos"
         
-        # 安装（提取）到临时目录
         if [ -f "install.sh" ]; then
             sh install.sh --prefix="$RA_INSTALL_DIR" --verbose
         else
-            # 如果没有 install.sh，手动复制
             mkdir -p "$RA_INSTALL_DIR/bin"
             cp -r bin/* "$RA_INSTALL_DIR/bin/" 2>/dev/null || true
         fi
         
-        # 打包
         cd $WORKDIR
         tar -zcf "$RA_PACKAGE" -C "$RA_INSTALL_DIR" .
         echo "=== rust-analyzer 独立包处理完成: $RA_PACKAGE ==="
@@ -322,7 +414,10 @@ echo "=== 构建完成 ==="
 echo ""
 echo "构建选项汇总:"
 echo "  DRY_RUN: $DRY_RUN"
+echo "  CLEAN_BUILD: $CLEAN_BUILD"
 echo "  RUSTUP_DIST_SERVER: $RUSTUP_DIST_SERVER"
+echo "  SCCACHE_DIR: $SCCACHE_DIR"
+echo "  CCACHE_DIR: $CCACHE_DIR"
 echo ""
 echo "产物位置: $WORKDIR/rust-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz"
-ls -lh rust-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz
+ls -lh "rust-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz"

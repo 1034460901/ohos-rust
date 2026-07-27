@@ -1,0 +1,16 @@
+# Build artifacts
+*.tar.gz
+rust-1.95.0-aarch64-unknown-linux-ohos/
+rustc-1.95.0-src/
+
+# Build caches
+.ccache/
+.sccache/
+
+# Build logs
+build.log
+build_new.log
+
+# OS files
+.DS_Store
+Thumbs.db
