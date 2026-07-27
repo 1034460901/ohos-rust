@@ -14,3 +14,4 @@ build_new.log
 # OS files
 .DS_Store
 Thumbs.db
+docs/CHANGELOG.md
