@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     unzip \
     patch \
     perl \
+    ccache \
     && rm -rf /var/lib/apt/lists/*
 
 # Fix git safe directory for CI

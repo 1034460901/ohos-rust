@@ -25,6 +25,11 @@ on:
         required: false
         default: false
         type: boolean
+      clean_build:
+        description: "Clean build (remove source and rebuild from scratch)"
+        required: false
+        default: true
+        type: boolean
       rust_version_select:
         description: "Rust version (select from list)"
         required: false
@@ -44,40 +49,9 @@ on:
 permissions: write-all
 
 jobs:
-  # build-on-arm64:
-  #   runs-on: ubuntu-24.04-arm
-  #   env:
-  #     FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-  #     RUST_VERSION: ${{ github.event.inputs.rust_version || '' }}
-  #   container:
-  #     image: ghcr.io/hqzing/dockerharmony:latest
-  #     volumes:
-  #       - /opt/node24:/__e/node24:rw,rshared
-  #   steps:
-  #     - name: Setup node for actions
-  #       run: |
-  #         curl -fLO https://github.com/hqzing/ohos-node/releases/download/v24.2.0/node-v24.2.0-openharmony-arm64.tar.gz
-  #         mkdir /__e/node24/bin
-  #         tar -zxf node-v24.2.0-openharmony-arm64.tar.gz -C /opt
-  #         ln -s /opt/node-v24.2.0-openharmony-arm64/bin/node /__e/node24/bin/node
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-  #     - name: Build
-  #       run: |
-  #         echo "=== ARM64 本地编译 aarch64-unknown-linux-ohos ==="
-  #         ./arm64/build.sh
-  #     - name: Upload artifact
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         path: ${{ github.workspace }}/rust-${{ env.RUST_VERSION }}-aarch64-unknown-linux-ohos.tar.gz
-  #         name: rust-${{ env.RUST_VERSION }}-aarch64-unknown-linux-ohos-native
-  #     - name: Upload release asset
-  #       uses: softprops/action-gh-release@v2
-  #       if: github.event_name == 'release'
-  #       with:
-  #         files: ${{ github.workspace }}/rust-${{ env.RUST_VERSION }}-aarch64-unknown-linux-ohos.tar.gz
   build-on-x86_64:
     runs-on: ubuntu-24.04
+    timeout-minutes: 360
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
     outputs:
@@ -136,15 +110,42 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
+      - name: Cache sccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.sccache
+          key: sccache-${{ steps.version.outputs.rust_version }}-${{ hashFiles('patches/**/*.patch') }}
+          restore-keys: |
+            sccache-${{ steps.version.outputs.rust_version }}-
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.ccache
+          key: ccache-${{ steps.version.outputs.rust_version }}-${{ hashFiles('patches/**/*.patch') }}
+          restore-keys: |
+            ccache-${{ steps.version.outputs.rust_version }}-
+
       - name: Build
         run: |
           DRY_RUN="${{ github.event.inputs.dry_run || 'false' }}"
+          CLEAN_BUILD="${{ github.event.inputs.clean_build || 'true' }}"
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
             -w /workspace \
             -e DRY_RUN="$DRY_RUN" \
+            -e CLEAN_BUILD="$CLEAN_BUILD" \
             -e RUST_VERSION="${{ steps.version.outputs.rust_version }}" \
+            -e SCCACHE_CACHE_SIZE=5G \
             rust-ohos-x86_64 ./x86_64/build.sh
+
+      - name: Stop sccache server
+        if: always()
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            -w /workspace \
+            rust-ohos-x86_64 sccache --stop-server 2>/dev/null || true
 
       # 1. 上传全家桶
       - name: Upload toolchain artifact
