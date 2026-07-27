@@ -780,7 +780,7 @@
      /// let one = x.erf() + x.erfc();
 --- a/src/bootstrap/src/core/build_steps/doc.rs
 +++ b/src/bootstrap/src/core/build_steps/doc.rs
-@@ -1239,6 +1239,10 @@ impl Step for ErrorIndex {
+@@ -1239,6 +1239,12 @@ impl Step for ErrorIndex {
      }
  
      fn make_run(run: RunConfig<'_>) {
@@ -795,7 +795,7 @@
          });
 --- a/src/bootstrap/src/core/build_steps/dist.rs
 +++ b/src/bootstrap/src/core/build_steps/dist.rs
-@@ -1879,8 +1879,11 @@ impl Step for Extended {
+@@ -1879,4 +1879,8 @@ impl Step for Extended {
          add_component!("rust-docs" => Docs { host: target });
          // Std stage N is documented with compiler stage N
 -        add_component!("rust-json-docs" => JsonDocs { build_compiler: target_compiler, target });
