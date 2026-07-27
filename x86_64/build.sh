@@ -137,11 +137,11 @@ if [ ! -d "$SRC_DIR" ]; then
         OFFICIAL_URL="https://static.rust-lang.org/dist/rustc-$RUST_VERSION-src.tar.gz"
         MIRROR_URL="https://mirrors.ustc.edu.cn/rust-static/dist/rustc-$RUST_VERSION-src.tar.gz"
         if [ "$USE_MIRROR" = "true" ]; then
-            RUST_SRC_URLS=("$MIRROR_URL" "$OFFICIAL_URL")
+            URLS="$MIRROR_URL $OFFICIAL_URL"
         else
-            RUST_SRC_URLS=("$OFFICIAL_URL" "$MIRROR_URL")
+            URLS="$OFFICIAL_URL $MIRROR_URL"
         fi
-        for url in "${RUST_SRC_URLS[@]}"; do
+        for url in $URLS; do
             echo "  尝试下载: $url"
             if curl -fLO "$url"; then
                 break
