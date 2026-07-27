@@ -27,8 +27,12 @@ DRY_RUN=${DRY_RUN:-false}
 # 默认 false，保留源码和编译缓存，支持增量编译
 CLEAN_BUILD=${CLEAN_BUILD:-false}
 
-# Bootstrap 下载镜像（与 0003 patch 中 src/stage0 的 USTC 镜像保持一致）
-export RUSTUP_DIST_SERVER=${RUSTUP_DIST_SERVER:-https://mirrors.ustc.edu.cn/rust-static}
+# Bootstrap 下载镜像（USE_MIRROR=true 时使用 USTC 镜像，否则使用官方源）
+if [ "$USE_MIRROR" = "true" ]; then
+    export RUSTUP_DIST_SERVER=${RUSTUP_DIST_SERVER:-https://mirrors.ustc.edu.cn/rust-static}
+else
+    export RUSTUP_DIST_SERVER=${RUSTUP_DIST_SERVER:-https://static.rust-lang.org}
+fi
 
 # ========================================
 # 本地环境检测与设置
@@ -130,7 +134,23 @@ fi
 if [ ! -d "$SRC_DIR" ]; then
     echo "=== 下载 Rust 源码 ==="
     if [ ! -f "$WORKDIR/rustc-$RUST_VERSION-src.tar.gz" ]; then
-        curl -fLO "https://mirrors.ustc.edu.cn/rust-static/dist/rustc-$RUST_VERSION-src.tar.gz"
+        OFFICIAL_URL="https://static.rust-lang.org/dist/rustc-$RUST_VERSION-src.tar.gz"
+        MIRROR_URL="https://mirrors.ustc.edu.cn/rust-static/dist/rustc-$RUST_VERSION-src.tar.gz"
+        if [ "$USE_MIRROR" = "true" ]; then
+            RUST_SRC_URLS=("$MIRROR_URL" "$OFFICIAL_URL")
+        else
+            RUST_SRC_URLS=("$OFFICIAL_URL" "$MIRROR_URL")
+        fi
+        for url in "${RUST_SRC_URLS[@]}"; do
+            echo "  尝试下载: $url"
+            if curl -fLO "$url"; then
+                break
+            fi
+        done
+        if [ ! -f "$WORKDIR/rustc-$RUST_VERSION-src.tar.gz" ]; then
+            echo "错误: 所有下载源均失败" >&2
+            exit 1
+        fi
     fi
     tar -zxf "rustc-$RUST_VERSION-src.tar.gz" -C "$WORKDIR"
 else
@@ -185,6 +205,15 @@ with open('$checksum_file', 'w') as f:
     echo "=== Patches 应用完成 ==="
 else
     echo "=== Patches 已应用（标记文件存在），跳过 ==="
+fi
+
+# ========================================
+# 镜像源覆盖（可选，用于国内加速）
+# ========================================
+if [ "$USE_MIRROR" = "true" ]; then
+    echo "=== 使用 USTC 镜像源加速 ==="
+    sed -i 's|https://static.rust-lang.org|https://mirrors.ustc.edu.cn/rust-static|g' src/stage0
+    sed -i 's|https://ci-artifacts.rust-lang.org/rustc-builds|https://mirrors.ustc.edu.cn/rust-static/rustc-builds|g' src/stage0
 fi
 
 # ========================================

@@ -188,18 +188,6 @@
          };
  
          match mode {
---- a/src/stage0	2026-04-15 03:55:32.000000000 +0800
-+++ b/src/stage0	2026-07-15 16:25:13.465130000 +0800
-@@ -1,6 +1,6 @@
--dist_server=https://static.rust-lang.org
--artifacts_server=https://ci-artifacts.rust-lang.org/rustc-builds
--artifacts_with_llvm_assertions_server=https://ci-artifacts.rust-lang.org/rustc-builds-alt
-+dist_server=https://mirrors.ustc.edu.cn/rust-static
-+artifacts_server=https://mirrors.ustc.edu.cn/rust-static/rustc-builds
-+artifacts_with_llvm_assertions_server=https://mirrors.ustc.edu.cn/rust-static/rustc-builds-alt
- git_merge_commit_email=bors@rust-lang.org
- nightly_branch=main
- 
 --- a/compiler/rustc_codegen_llvm/src/llvm_util.rs	2026-04-15 03:55:32.000000000 +0800
 +++ b/compiler/rustc_codegen_llvm/src/llvm_util.rs	2026-07-17 17:16:52.310530938 +0800
 @@ -438,7 +438,8 @@
