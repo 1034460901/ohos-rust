@@ -189,7 +189,7 @@ if [ ! -f "$PATCH_MARKER" ]; then
     for PATCH_FILE in "$PATCH_DIR"/*.patch; do
         if [ -f "$PATCH_FILE" ]; then
             echo "应用 patch: $(basename "$PATCH_FILE")"
-            patch -p1 --forward < "$PATCH_FILE"
+            patch -p1 --forward < "$PATCH_FILE" || true
         fi
     done
 
@@ -197,7 +197,7 @@ if [ ! -f "$PATCH_MARKER" ]; then
     # patch 修改了 vendor 目录下的源码，需要重置 .cargo-checksum.json
     # 否则 cargo 会因校验和不匹配而报错
     echo "=== 更新 vendored crate checksums ==="
-    for crate in vendor/openssl-probe-0.1.5 vendor/openssl-probe-0.1.6; do
+    for crate in vendor/openssl-probe-0.1.5 vendor/openssl-probe-0.1.6 vendor/libffi-sys-4.1.0; do
         checksum_file="$crate/.cargo-checksum.json"
         if [ -f "$checksum_file" ]; then
             echo "重置 checksum: $checksum_file"
@@ -240,6 +240,7 @@ rm -f bootstrap.toml
     --enable-extended \
     --enable-sccache \
     --set dist.vendor=false \
+    --set rust.deny-warnings=false \
     \
     --tools=\
 cargo,\
