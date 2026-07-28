@@ -15,7 +15,19 @@ else
     RUST_VERSION="1.95.0"
 fi
 
-echo "=== 构建 Rust 版本: $RUST_VERSION ==="
+# Release channel (stable/beta/nightly/dev)
+# nightly channel enables miri and unstable features
+CHANNEL=${CHANNEL:-nightly}
+
+# Construct release version string
+# stable: "1.95.0", nightly: "1.95.0-nightly"
+if [ "$CHANNEL" = "stable" ]; then
+    RELEASE="$RUST_VERSION"
+else
+    RELEASE="$RUST_VERSION-$CHANNEL"
+fi
+
+echo "=== 构建 Rust 版本: $RUST_VERSION (channel: $CHANNEL, release: $RELEASE) ==="
 
 # ========================================
 # 构建选项（可通过环境变量覆盖）
@@ -117,8 +129,8 @@ PATCH_MARKER="$SRC_DIR/.patches-applied"
 # 清理策略
 # ========================================
 # 始终清理输出产物
-rm -f "$WORKDIR"/rust-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz
-rm -rf "$WORKDIR/rust-$RUST_VERSION-aarch64-unknown-linux-ohos"
+rm -f "$WORKDIR"/rust-$RELEASE-aarch64-unknown-linux-ohos.tar.gz
+rm -rf "$WORKDIR/rust-$RELEASE-aarch64-unknown-linux-ohos"
 
 # CLEAN_BUILD=true 时完全清理源码和编译缓存
 if [ "$CLEAN_BUILD" = "true" ]; then
@@ -222,6 +234,7 @@ fi
 echo "=== 配置 Rust 构建 ==="
 rm -f bootstrap.toml
 ./configure \
+    --release-channel=$CHANNEL \
     --enable-profiler \
     --enable-sanitizers \
     --enable-extended \
@@ -251,7 +264,7 @@ if [ "$DRY_RUN" = "true" ]; then
     
     BUILD_DIST="$SRC_DIR/build/dist"
     MOCK_DIR="$BUILD_DIST/mock-install"
-    TARGET_NAME="rust-$RUST_VERSION-aarch64-unknown-linux-ohos"
+    TARGET_NAME="rust-$RELEASE-aarch64-unknown-linux-ohos"
     TARGET_DIR="$BUILD_DIST/$TARGET_NAME"
 
     rm -rf "$MOCK_DIR" "$TARGET_DIR"
@@ -335,8 +348,8 @@ mkdir -p "$RUST_INSTALL_DIR"
 
 echo "===RUST_INSTALL_DIR 安装 rustc ==="
 cd "$SRC_DIR/build/dist/"
-tar -zxf "rust-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz"
-cd "rust-$RUST_VERSION-aarch64-unknown-linux-ohos"
+tar -zxf "rust-$RELEASE-aarch64-unknown-linux-ohos.tar.gz"
+cd "rust-$RELEASE-aarch64-unknown-linux-ohos"
 
 sh install.sh --prefix="$RUST_INSTALL_DIR" --verbose
 
@@ -345,10 +358,10 @@ sh install.sh --prefix="$RUST_INSTALL_DIR" --verbose
 # ========================================
 echo "=== 安装附加组件包 ==="
 for PKG_TGZ in \
-    "rust-src-$RUST_VERSION.tar.gz" \
-    "rust-docs-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz" \
-    "llvm-tools-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz" \
-    "miri-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz"
+    "rust-src-$RELEASE.tar.gz" \
+    "rust-docs-$RELEASE-aarch64-unknown-linux-ohos.tar.gz" \
+    "llvm-tools-$RELEASE-aarch64-unknown-linux-ohos.tar.gz" \
+    "miri-$RELEASE-aarch64-unknown-linux-ohos.tar.gz"
 do
     PKG_NAME="${PKG_TGZ%.tar.gz}"
     if [ -f "$SRC_DIR/build/dist/$PKG_TGZ" ]; then
@@ -395,17 +408,17 @@ EOF
 # 打包最终产物
 echo "=== 打包最终产物 ==="
 cd "$WORKDIR"
-FINAL_DIR="$WORKDIR/rust-$RUST_VERSION-aarch64-unknown-linux-ohos"
+FINAL_DIR="$WORKDIR/rust-$RELEASE-aarch64-unknown-linux-ohos"
 rm -rf "$FINAL_DIR"
 cp -r "$RUST_INSTALL_DIR" "$FINAL_DIR"
 
-tar -zcf "rust-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz" "rust-$RUST_VERSION-aarch64-unknown-linux-ohos"
+tar -zcf "rust-$RELEASE-aarch64-unknown-linux-ohos.tar.gz" "rust-$RELEASE-aarch64-unknown-linux-ohos"
 
 # ========================================
 # 处理 rust-analyzer 独立包
 # ========================================
 echo "=== 处理 rust-analyzer 独立包 ==="
-RA_PACKAGE="rust-analyzer-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz"
+RA_PACKAGE="rust-analyzer-$RELEASE-aarch64-unknown-linux-ohos.tar.gz"
 if [ -f "$SRC_DIR/build/dist/$RA_PACKAGE" ]; then
     RA_INSTALL_DIR="/tmp/rust-analyzer-install"
     rm -rf "$RA_INSTALL_DIR"
@@ -413,8 +426,8 @@ if [ -f "$SRC_DIR/build/dist/$RA_PACKAGE" ]; then
 
     cd "$SRC_DIR/build/dist/"
     tar -zxf "$RA_PACKAGE"
-    if [ -d "rust-analyzer-$RUST_VERSION-aarch64-unknown-linux-ohos" ]; then
-        cd "rust-analyzer-$RUST_VERSION-aarch64-unknown-linux-ohos"
+    if [ -d "rust-analyzer-$RELEASE-aarch64-unknown-linux-ohos" ]; then
+        cd "rust-analyzer-$RELEASE-aarch64-unknown-linux-ohos"
         
         if [ -f "install.sh" ]; then
             sh install.sh --prefix="$RA_INSTALL_DIR" --verbose
@@ -439,11 +452,14 @@ sync
 echo "=== 构建完成 ==="
 echo ""
 echo "构建选项汇总:"
+echo "  RUST_VERSION: $RUST_VERSION"
+echo "  CHANNEL: $CHANNEL"
+echo "  RELEASE: $RELEASE"
 echo "  DRY_RUN: $DRY_RUN"
 echo "  CLEAN_BUILD: $CLEAN_BUILD"
 echo "  RUSTUP_DIST_SERVER: $RUSTUP_DIST_SERVER"
 echo "  SCCACHE_DIR: $SCCACHE_DIR"
 echo "  CCACHE_DIR: $CCACHE_DIR"
 echo ""
-echo "产物位置: $WORKDIR/rust-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz"
-ls -lh "rust-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz"
+echo "产物位置: $WORKDIR/rust-$RELEASE-aarch64-unknown-linux-ohos.tar.gz"
+ls -lh "rust-$RELEASE-aarch64-unknown-linux-ohos.tar.gz"

@@ -15,7 +15,7 @@ on:
   release:
     types: [ published ]
   push:
-    branches: [ "main" ]
+    branches: [ "main", "nightly" ]
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
@@ -79,8 +79,24 @@ jobs:
               ;;
           esac
 
+          # Determine channel from branch (nightly branch → nightly channel)
+          if [ "${{ github.ref_name }}" = "nightly" ]; then
+            CHANNEL="nightly"
+          else
+            CHANNEL="stable"
+          fi
+
+          # Construct release string: stable → "1.95.0", nightly → "1.95.0-nightly"
+          if [ "$CHANNEL" = "stable" ]; then
+            RELEASE="$RUST_VER"
+          else
+            RELEASE="$RUST_VER-$CHANNEL"
+          fi
+
           echo "rust_version=$RUST_VER" >> $GITHUB_OUTPUT
-          echo "=== Building Rust version: $RUST_VER ==="
+          echo "release=$RELEASE" >> $GITHUB_OUTPUT
+          echo "channel=$CHANNEL" >> $GITHUB_OUTPUT
+          echo "=== Building Rust version: $RUST_VER (channel: $CHANNEL, release: $RELEASE) ==="
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -136,6 +152,7 @@ jobs:
             -e DRY_RUN="$DRY_RUN" \
             -e CLEAN_BUILD="$CLEAN_BUILD" \
             -e RUST_VERSION="${{ steps.version.outputs.rust_version }}" \
+            -e CHANNEL="${{ steps.version.outputs.channel }}" \
             -e SCCACHE_CACHE_SIZE=5G \
             rust-ohos-x86_64 ./x86_64/build.sh
 
@@ -151,9 +168,9 @@ jobs:
       - name: Upload toolchain artifact
         uses: actions/upload-artifact@v4
         with:
-          path: ${{ github.workspace }}/rust-${{ steps.version.outputs.rust_version
+          path: ${{ github.workspace }}/rust-${{ steps.version.outputs.release
             }}-aarch64-unknown-linux-ohos.tar.gz
-          name: rust-${{ steps.version.outputs.rust_version
+          name: rust-${{ steps.version.outputs.release
             }}-aarch64-unknown-linux-ohos-cross
           retention-days: 90
 
@@ -162,9 +179,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: ${{ github.workspace }}/rust-analyzer-${{
-            steps.version.outputs.rust_version
+            steps.version.outputs.release
             }}-aarch64-unknown-linux-ohos.tar.gz
-          name: rust-analyzer-${{ steps.version.outputs.rust_version
+          name: rust-analyzer-${{ steps.version.outputs.release
             }}-aarch64-unknown-linux-ohos-cross
           retention-days: 90
 
@@ -173,5 +190,5 @@ jobs:
         if: github.event_name == 'release'
         with:
           files: |
-            ${{ github.workspace }}/rust-${{ steps.version.outputs.rust_version }}-aarch64-unknown-linux-ohos.tar.gz
-            ${{ github.workspace }}/rust-analyzer-${{ steps.version.outputs.rust_version }}-aarch64-unknown-linux-ohos.tar.gz
+            ${{ github.workspace }}/rust-${{ steps.version.outputs.release }}-aarch64-unknown-linux-ohos.tar.gz
+            ${{ github.workspace }}/rust-analyzer-${{ steps.version.outputs.release }}-aarch64-unknown-linux-ohos.tar.gz
