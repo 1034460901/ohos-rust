@@ -84,7 +84,6 @@ export CXX_aarch64_unknown_linux_ohos="$CLANG_WRAPPER_DIR/aarch64-unknown-linux-
 export AR_aarch64_unknown_linux_ohos="$SDK_DIR/native/llvm/bin/llvm-ar"
 export AARCH64_UNKNOWN_LINUX_OHOS_OPENSSL_DIR="$OPENSSL_DIR"
 export AARCH64_UNKNOWN_LINUX_OHOS_OPENSSL_NO_VENDOR=1
-export AARCH64_UNKNOWN_LINUX_OHOS_OPENSSL_STATIC=1
 export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_OHOS_LINKER="$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang.sh"
 
 # ========================================
@@ -226,8 +225,6 @@ rm -f bootstrap.toml
     --enable-profiler \
     --enable-sanitizers \
     --enable-extended \
-    --enable-cargo-native-static \
-    --set rust.rpath=true \
     --enable-sccache \
     --set dist.vendor=false \
     \
