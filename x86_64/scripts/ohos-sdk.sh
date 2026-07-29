@@ -9,15 +9,19 @@ rm /tmp/ohos-sdk-full.tar.gz
 
 cd /opt/ohos-sdk
 
-# 仅删除 Windows 组件，保留 ohos 目录
+# 仅删除 Windows 组件，保留 linux 和 ohos
 rm -rf windows
 
-# SDK 7.0 结构: ohos/ 目录包含 native-ohos-x64-*.zip 和 toolchains-ohos-x64-*.zip
-# 解压 native SDK（含 LLVM/clang 主机工具 + 目标 sysroot）
-cd ohos
-unzip -q native-ohos-x64-*.zip
-unzip -q toolchains-ohos-x64-*.zip 2>/dev/null || true
+# 解压 Linux 主机工具链（交叉编译器 clang、lld 等）
+cd linux
+unzip -q native-linux-x64-*.zip
+unzip -q toolchains-linux-x64-*.zip 2>/dev/null || true
 rm -rf *.zip
 
-# 创建兼容符号链接: /opt/ohos-sdk/native -> ohos/native
-ln -sf ohos/native /opt/ohos-sdk/native
+# 创建兼容符号链接: /opt/ohos-sdk/native -> linux/native
+ln -sf linux/native /opt/ohos-sdk/native
+
+cd ../ohos
+unzip -q native-*.zip
+unzip -q toolchains-*.zip 2>/dev/null || true
+rm -rf *.zip
