@@ -390,40 +390,6 @@ done
 echo "=== 产物位置: $RUST_INSTALL_DIR ==="
 ls -la "$RUST_INSTALL_DIR/" || echo "目录不存在"
 
-# ========================================
-# 代码签名
-# ========================================
-# lld 的 --code-sign 生成的 fs-verity Merkle tree hash 与 hmmac 期望的不一致,
-# 需要使用 binary-sign-tool 重新签名所有 ELF 二进制文件.
-# ohos_auto_resign() 已在编译时签名了部分二进制,此处作为兜底确保全部签名.
-echo "=== 代码签名 ==="
-SIGN_TOOL="${OHOS_BINARY_SIGN_TOOL:-/usr/local/bin/binary-sign-tool}"
-if [ -f "$SIGN_TOOL" ] || command -v "$SIGN_TOOL" >/dev/null 2>&1; then
-    echo "使用签名工具: $SIGN_TOOL"
-    cd "$RUST_INSTALL_DIR"
-    find . -type f | while read -r FILE; do
-        if file -b "$FILE" | grep -qiE "elf"; then
-            echo "Signing: $FILE"
-            ORIG_PERM=$(stat -c %a "$FILE")
-            chmod +w "$FILE"
-            SIGNED_TMP="${FILE}.signed"
-            if "$SIGN_TOOL" sign -inFile "$FILE" -outFile "$SIGNED_TMP" -selfSign 1; then
-                mv "$SIGNED_TMP" "$FILE"
-                chmod "$ORIG_PERM" "$FILE"
-            else
-                echo "Failed to sign: $FILE"
-                rm -f "$SIGNED_TMP"
-                exit 1
-            fi
-        fi
-    done
-    cd "$WORKDIR"
-    echo "=== 代码签名完成 ==="
-else
-    echo "WARNING: binary-sign-tool not found at $SIGN_TOOL, skipping signing"
-    echo "  Set OHOS_BINARY_SIGN_TOOL env var to specify the tool path"
-fi
-
 # 生成 license 文件
 echo "=== 生成 license 文件 ==="
 cat <<EOF > "$RUST_INSTALL_DIR/licenses.txt"
@@ -449,12 +415,6 @@ FINAL_DIR="$WORKDIR/rust-$PKG_VERSION-aarch64-unknown-linux-ohos"
 rm -rf "$FINAL_DIR"
 cp -r "$RUST_INSTALL_DIR" "$FINAL_DIR"
 
-# Include binary-sign-tool in the distribution for user program signing
-mkdir -p "$FINAL_DIR/tool"
-cp "$WORKDIR/x86_64/tools/binary-sign-tool.jar" "$FINAL_DIR/tool/"
-cp "$WORKDIR/x86_64/scripts/binary-sign-tool.sh" "$FINAL_DIR/tool/"
-chmod +x "$FINAL_DIR/tool/binary-sign-tool.sh"
-
 tar -zcf "rust-$PKG_VERSION-aarch64-unknown-linux-ohos.tar.gz" "rust-$PKG_VERSION-aarch64-unknown-linux-ohos"
 
 # ========================================
@@ -477,30 +437,6 @@ if [ -f "$SRC_DIR/build/dist/$RA_PACKAGE" ]; then
         else
             mkdir -p "$RA_INSTALL_DIR/bin"
             cp -r bin/* "$RA_INSTALL_DIR/bin/" 2>/dev/null || true
-        fi
-        
-        # Sign rust-analyzer binaries
-        SIGN_TOOL="${OHOS_BINARY_SIGN_TOOL:-/usr/local/bin/binary-sign-tool}"
-        if [ -f "$SIGN_TOOL" ] || command -v "$SIGN_TOOL" >/dev/null 2>&1; then
-            echo "=== 签名 rust-analyzer ==="
-            cd "$RA_INSTALL_DIR"
-            find . -type f | while read -r FILE; do
-                if file -b "$FILE" | grep -qiE "elf"; then
-                    echo "Signing RA: $FILE"
-                    ORIG_PERM=$(stat -c %a "$FILE")
-                    chmod +w "$FILE"
-                    SIGNED_TMP="${FILE}.signed"
-                    if "$SIGN_TOOL" sign -inFile "$FILE" -outFile "$SIGNED_TMP" -selfSign 1; then
-                        mv "$SIGNED_TMP" "$FILE"
-                        chmod "$ORIG_PERM" "$FILE"
-                    else
-                        echo "Failed to sign RA: $FILE"
-                        rm -f "$SIGNED_TMP"
-                        exit 1
-                    fi
-                fi
-            done
-            cd "$WORKDIR"
         fi
         
         cd $WORKDIR
