@@ -3,13 +3,16 @@
 rust-1.95.0-aarch64-unknown-linux-ohos/
 rustc-1.95.0-src/
 
+# Symlinks (created by build.sh)
+x86_64/patches
+x86_64/rustc-*-src
+
 # Build caches
 .ccache/
 .sccache/
 
 # Build logs
-build.log
-build_new.log
+*.log
 
 # OS files
 .DS_Store
