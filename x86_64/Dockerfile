@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     patch \
     perl \
     ccache \
+    openjdk-11-jre-headless \
     && rm -rf /var/lib/apt/lists/*
 
 # Fix git safe directory for CI
@@ -35,6 +36,15 @@ COPY x86_64/scripts/ohos/aarch64-unknown-linux-ohos-clang++.sh /usr/local/bin/
 
 COPY x86_64/scripts/ohos-openssl.sh /scripts/
 RUN sh /scripts/ohos-openssl.sh
+
+# Install binary-sign-tool for OHOS code signing
+# lld's --code-sign produces incorrect Merkle tree hashes that hmmac rejects.
+# binary-sign-tool (Java JAR) generates correct fs-verity signatures accepted by OHOS.
+COPY x86_64/tools/binary-sign-tool.jar /opt/binary-sign-tool/binary-sign-tool.jar
+COPY x86_64/scripts/binary-sign-tool.sh /usr/local/bin/binary-sign-tool
+RUN chmod +x /usr/local/bin/binary-sign-tool
+
+ENV OHOS_BINARY_SIGN_TOOL=/usr/local/bin/binary-sign-tool
 
 # env
 ENV AARCH64_UNKNOWN_LINUX_OHOS_OPENSSL_DIR=/opt/ohos-openssl/prelude/arm64-v8a
