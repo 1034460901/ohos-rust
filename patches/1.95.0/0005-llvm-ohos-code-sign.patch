@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: OHOS Rust Builder <ohos-rust@example.com>
+Date: Wed, 30 Jul 2026 11:00:00 +0800
+Subject: [PATCH] llvm: add --code-sign to CMake linker flags for OHOS targets
+
+LLVM tools (llvm-ar, llvm-nm, llc, opt, etc.) are built by CMake, not by
+rustc. CMake does not read the Rust target spec's pre_link_args, so the
+-Wl,--code-sign flag from linux_ohos.rs is not applied to LLVM binaries.
+
+This patch adds -Wl,--code-sign to CMAKE_EXE_LINKER_FLAGS,
+CMAKE_SHARED_LINKER_FLAGS, and CMAKE_MODULE_LINKER_FLAGS when building
+for OHOS targets, ensuring that all LLVM tools get the .codesign section
+required to run on OHOS devices.
+
+Without this, LLVM tools in the toolchain are aarch64 OHOS binaries but
+cannot run on OHOS devices because they lack code signatures.
+
+--- a/src/bootstrap/src/core/build_steps/llvm.rs
++++ b/src/bootstrap/src/core/build_steps/llvm.rs
+@@ -871,6 +871,10 @@
+         }
+     }
+ 
++    if target.contains("ohos") {
++        ldflags.push_all("-Wl,--code-sign");
++    }
++
+     cfg.define("CMAKE_SHARED_LINKER_FLAGS", &ldflags.shared);
+     cfg.define("CMAKE_MODULE_LINKER_FLAGS", &ldflags.module);
+     cfg.define("CMAKE_EXE_LINKER_FLAGS", &ldflags.exe);
+-- 
+2.25.1
