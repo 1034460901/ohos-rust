@@ -805,3 +805,40 @@
 +            add_component!("rust-json-docs" => JsonDocs { build_compiler: target_compiler, target });
 +        }
          add_component!("cargo" => Cargo { build_compiler, target });
+
+diff --git a/vendor/libffi-sys-4.1.0/libffi/config.sub b/vendor/libffi-sys-4.1.0/libffi/config.sub
+--- a/vendor/libffi-sys-4.1.0/libffi/config.sub
++++ b/vendor/libffi-sys-4.1.0/libffi/config.sub
+@@ -1768,7 +1768,7 @@
+ 	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
+ 	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi* \
+ 	     | nsk* | powerunix* | genode* | zvmoe* | qnx* | emx* | zephyr* \
+-	     | fiwix* | mlibc* | cos* | mbr* | ironclad* )
++	     | fiwix* | mlibc* | cos* | mbr* | ironclad* | ohos* )
+ 		;;
+ 	# This one is extra strict with allowed versions
+ 	sco3.2v2 | sco3.2v[4-9]* | sco5v6*)
+@@ -1829,7 +1829,7 @@
+ case $kernel-$os-$obj in
+ 	linux-gnu*- | linux-android*- | linux-dietlibc*- | linux-llvm*- \
+ 		    | linux-mlibc*- | linux-musl*- | linux-newlib*- \
+-		    | linux-relibc*- | linux-uclibc*- )
++		    | linux-relibc*- | linux-uclibc*- | linux-ohos*- )
+ 		;;
+ 	uclinux-uclibc*- )
+ 		;;
+
+--- a/src/bootstrap/src/core/build_steps/llvm.rs
++++ b/src/bootstrap/src/core/build_steps/llvm.rs
+@@ -871,6 +871,10 @@
+         }
+     }
+ 
++    if target.contains("ohos") {
++        ldflags.push_all("-Wl,--code-sign");
++    }
++
+     cfg.define("CMAKE_SHARED_LINKER_FLAGS", &ldflags.shared);
+     cfg.define("CMAKE_MODULE_LINKER_FLAGS", &ldflags.module);
+     cfg.define("CMAKE_EXE_LINKER_FLAGS", &ldflags.exe);
+-- 
