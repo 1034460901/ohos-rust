@@ -1,7 +1,10 @@
 #!/bin/sh
 set -e
 
-WORKDIR=$(pwd)
+# 自动定位仓库根目录(脚本位于 x86_64/ 下,仓库根为上一级)
+# 使 build.sh 可从任意目录调用,无需 cd 到特定位置
+SCRIPT_DIR=$(CDPATH= cd "$(dirname "$0")" && pwd)
+WORKDIR=$(CDPATH= cd "$SCRIPT_DIR/.." && pwd)
 
 # ========================================
 # 版本配置（可通过环境变量或命令行参数覆盖）
@@ -77,21 +80,75 @@ if command -v dpkg >/dev/null 2>&1; then
     fi
 
     if [ -n "$missing_required" ]; then
-        echo "  [ERROR] 缺少必需系统包:$missing_required"
-        echo ""
-        echo "  请安装:"
-        echo "    sudo apt-get install -y$missing_required"
-        echo ""
-        echo "  或使用 Docker 构建 (CI 自动处理依赖):"
-        echo "    docker build -f x86_64/Dockerfile -t rust-ohos-x86_64 ."
-        echo "    docker run --rm -v \$(pwd):/workspace rust-ohos-x86_64 ./x86_64/build.sh"
-        exit 1
+        echo "  [WARN] 缺少必需系统包:$missing_required"
+        # 检测 sudo 可用性(非交互或免密 sudo)
+        if command -v sudo >/dev/null 2>&1 && sudo -n true 2>/dev/null; then
+            SUDO=sudo
+        elif [ "$(id -u)" = "0" ]; then
+            SUDO=
+        else
+            SUDO=
+        fi
+
+        if [ -n "$SUDO" ] || [ "$(id -u)" = "0" ]; then
+            echo "  [AUTO] 尝试自动安装缺失系统包..."
+            $SUDO apt-get update
+            $SUDO apt-get install -y$missing_required $missing_optional
+            # 重新检测
+            still_missing=""
+            for pkg in $missing_required; do
+                if ! dpkg -s "$pkg" >/dev/null 2>&1; then
+                    still_missing="$still_missing $pkg"
+                fi
+            done
+            if [ -n "$still_missing" ]; then
+                echo "  [ERROR] 自动安装后仍缺失:$still_missing"
+                exit 1
+            fi
+            echo "  [OK] 系统包已自动安装"
+        else
+            echo "  [ERROR] 无 sudo 权限,无法自动安装"
+            echo "  请手动执行:"
+            echo "    sudo apt-get install -y$missing_required $missing_optional"
+            echo ""
+            echo "  或使用 Docker 构建 (CI 自动处理依赖):"
+            echo "    docker build -f x86_64/Dockerfile -t rust-ohos-x86_64 ."
+            echo "    docker run --rm -v \$(pwd):/workspace rust-ohos-x86_64 ./x86_64/build.sh"
+            exit 1
+        fi
     fi
 
     echo "  [OK] 所有必需包已安装"
 else
     echo "  [SKIP] 非 Debian/Ubuntu 系统 (dpkg 不可用)，跳过包检测"
     echo "         请确保已安装等效的编译工具链"
+fi
+
+# ========================================
+# 权限检测(sccache/SDK/OpenSSL/clang wrapper 需写入 /opt 和 /usr/local/bin)
+# ========================================
+if [ "$(id -u)" = "0" ]; then
+    SUDO=
+elif command -v sudo >/dev/null 2>&1 && sudo -n true 2>/dev/null; then
+    SUDO=sudo
+else
+    SUDO=
+fi
+
+# ========================================
+# sccache 自动安装(build.sh 本地构建时,Dockerfile 不会执行)
+# ========================================
+SCCACHE_BIN=/usr/local/bin/sccache
+if [ ! -x "$SCCACHE_BIN" ]; then
+    if [ -f "$WORKDIR/x86_64/scripts/sccache.sh" ]; then
+        echo "=== 安装 sccache ==="
+        if [ -n "$SUDO" ] || [ "$(id -u)" = "0" ]; then
+            sh "$WORKDIR/x86_64/scripts/sccache.sh"
+        else
+            echo "[WARN] 无 root 权限,无法安装 sccache 到 /usr/local/bin"
+            echo "       bootstrap 将回退为无缓存编译(不影响产物正确性)"
+        fi
+    fi
 fi
 
 # ========================================
@@ -105,7 +162,12 @@ CLANG_WRAPPER_DIR=/usr/local/bin
 if [ ! -d "$SDK_DIR/native" ]; then
     if [ -f "$WORKDIR/x86_64/scripts/ohos-sdk.sh" ]; then
         echo "=== 设置 OHOS SDK ==="
-        sh "$WORKDIR/x86_64/scripts/ohos-sdk.sh"
+        if [ -z "$SUDO" ] && [ "$(id -u)" != "0" ]; then
+            echo "[ERROR] 安装 OHOS SDK 需写入 $SDK_DIR,但无 sudo 权限"
+            echo "        请以 root 运行,或配置免密 sudo (sudo -n)"
+            exit 1
+        fi
+        $SUDO sh "$WORKDIR/x86_64/scripts/ohos-sdk.sh"
     else
         echo "错误: OHOS SDK 未安装 ($SDK_DIR/native 不存在)"
         echo "请先运行 x86_64/scripts/ohos-sdk.sh 或通过 Docker 构建"
@@ -116,13 +178,18 @@ fi
 if [ ! -f "$OPENSSL_DIR/lib/libssl.a" ]; then
     if [ -f "$WORKDIR/x86_64/scripts/ohos-openssl.sh" ]; then
         echo "=== 构建 OHOS OpenSSL ==="
-        # 先确保 clang wrapper 存在
-        if [ ! -f "$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang.sh" ]; then
-            cp "$WORKDIR/x86_64/scripts/ohos/aarch64-unknown-linux-ohos-clang.sh" "$CLANG_WRAPPER_DIR/"
-            cp "$WORKDIR/x86_64/scripts/ohos/aarch64-unknown-linux-ohos-clang++.sh" "$CLANG_WRAPPER_DIR/"
-            chmod +x "$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang.sh" "$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang++.sh"
+        if [ -z "$SUDO" ] && [ "$(id -u)" != "0" ]; then
+            echo "[ERROR] 构建 OHOS OpenSSL 需写入 /opt,但无 sudo 权限"
+            echo "        请以 root 运行,或配置免密 sudo (sudo -n)"
+            exit 1
         fi
-        sh "$WORKDIR/x86_64/scripts/ohos-openssl.sh"
+        # 先确保 clang wrapper 存在(ohos-openssl.sh 依赖它)
+        if [ ! -f "$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang.sh" ]; then
+            $SUDO cp "$WORKDIR/x86_64/scripts/ohos/aarch64-unknown-linux-ohos-clang.sh" "$CLANG_WRAPPER_DIR/"
+            $SUDO cp "$WORKDIR/x86_64/scripts/ohos/aarch64-unknown-linux-ohos-clang++.sh" "$CLANG_WRAPPER_DIR/"
+            $SUDO chmod +x "$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang.sh" "$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang++.sh"
+        fi
+        $SUDO sh "$WORKDIR/x86_64/scripts/ohos-openssl.sh"
     else
         echo "错误: OHOS OpenSSL 未构建 ($OPENSSL_DIR/lib/libssl.a 不存在)"
         echo "请先运行 x86_64/scripts/ohos-openssl.sh 或通过 Docker 构建"
@@ -132,9 +199,13 @@ fi
 
 # 确保 clang wrapper 存在
 if [ ! -f "$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang.sh" ]; then
-    cp "$WORKDIR/x86_64/scripts/ohos/aarch64-unknown-linux-ohos-clang.sh" "$CLANG_WRAPPER_DIR/"
-    cp "$WORKDIR/x86_64/scripts/ohos/aarch64-unknown-linux-ohos-clang++.sh" "$CLANG_WRAPPER_DIR/"
-    chmod +x "$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang.sh" "$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang++.sh"
+    if [ -z "$SUDO" ] && [ "$(id -u)" != "0" ]; then
+        echo "[ERROR] 安装 clang wrapper 需写入 $CLANG_WRAPPER_DIR,但无 sudo 权限"
+        exit 1
+    fi
+    $SUDO cp "$WORKDIR/x86_64/scripts/ohos/aarch64-unknown-linux-ohos-clang.sh" "$CLANG_WRAPPER_DIR/"
+    $SUDO cp "$WORKDIR/x86_64/scripts/ohos/aarch64-unknown-linux-ohos-clang++.sh" "$CLANG_WRAPPER_DIR/"
+    $SUDO chmod +x "$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang.sh" "$CLANG_WRAPPER_DIR/aarch64-unknown-linux-ohos-clang++.sh"
 fi
 
 # 设置交叉编译环境变量
