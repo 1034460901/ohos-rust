@@ -841,4 +841,310 @@ diff --git a/vendor/libffi-sys-4.1.0/libffi/config.sub b/vendor/libffi-sys-4.1.0
      cfg.define("CMAKE_SHARED_LINKER_FLAGS", &ldflags.shared);
      cfg.define("CMAKE_MODULE_LINKER_FLAGS", &ldflags.module);
      cfg.define("CMAKE_EXE_LINKER_FLAGS", &ldflags.exe);
--- 
+diff --git a/src/tools/cargo/crates/cargo-test-support/src/git.rs b/src/tools/cargo/crates/cargo-test-support/src/git.rs
+--- a/src/tools/cargo/crates/cargo-test-support/src/git.rs
++++ b/src/tools/cargo/crates/cargo-test-support/src/git.rs
+@@ -155,6 +155,12 @@
+         t!(set_search_path(ConfigLevel::Global, &path));
+         t!(set_search_path(ConfigLevel::XDG, &path));
+         t!(set_search_path(ConfigLevel::ProgramData, &path));
++        // On HarmonyOS (ohos), hmdfs creates files with a different UID than
++        // the current user, causing libgit2's owner validation to fail.
++        // Disable the check to allow tests to run.
++        #[cfg(target_env = "ohos")]
++        git2::opts::set_verify_owner_validation(false)
++            .expect("set_verify_owner_validation should never fail");
+     })
+ }
+ 
+diff --git a/src/tools/cargo/tests/testsuite/build.rs b/src/tools/cargo/tests/testsuite/build.rs
+--- a/src/tools/cargo/tests/testsuite/build.rs
++++ b/src/tools/cargo/tests/testsuite/build.rs
+@@ -796,6 +796,7 @@
+ 
+ #[cargo_test]
+ #[cfg(target_os = "linux")]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs is case-insensitive")]
+ fn cargo_compile_with_lowercase_cargo_toml() {
+     let p = project()
+         .no_manifest()
+@@ -4488,6 +4489,7 @@
+ 
+ /// Checks what happens when both rust-wrapper and rustc-workspace-wrapper are set.
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs chmod EPERM")]
+ fn rustc_wrapper_precedence() {
+     let p = project().file("src/lib.rs", "").build();
+     let rustc_wrapper = tools::echo_wrapper();
+@@ -4534,6 +4536,7 @@
+ }
+ 
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs chmod EPERM")]
+ fn rustc_wrapper_relative() {
+     Package::new("bar", "1.0.0").publish();
+     let p = project()
+diff --git a/src/tools/cargo/tests/testsuite/cargo_command.rs b/src/tools/cargo/tests/testsuite/cargo_command.rs
+--- a/src/tools/cargo/tests/testsuite/cargo_command.rs
++++ b/src/tools/cargo/tests/testsuite/cargo_command.rs
+@@ -574,6 +574,7 @@
+ }
+ 
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs chmod EPERM")]
+ fn overwrite_cargo_environment_variable() {
+     let rustc_host = rustc_host();
+     // If passed arguments `arg1 arg2 ...`, this program runs them as a command.
+diff --git a/src/tools/cargo/tests/testsuite/concurrent.rs b/src/tools/cargo/tests/testsuite/concurrent.rs
+--- a/src/tools/cargo/tests/testsuite/concurrent.rs
++++ b/src/tools/cargo/tests/testsuite/concurrent.rs
+@@ -512,6 +512,7 @@
+ }
+ 
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "snapshot mismatch (timing)")]
+ fn verbose_file_lock_blocking() {
+     let p = project()
+         .file(
+diff --git a/src/tools/cargo/tests/testsuite/freshness.rs b/src/tools/cargo/tests/testsuite/freshness.rs
+--- a/src/tools/cargo/tests/testsuite/freshness.rs
++++ b/src/tools/cargo/tests/testsuite/freshness.rs
+@@ -2971,6 +2971,7 @@
+ }
+ 
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs chmod EPERM")]
+ fn cargo_env_changes() {
+     // Checks that changes to the env var CARGO in the dep-info file triggers
+     // a rebuild.
+@@ -3186,6 +3187,7 @@
+ }
+ 
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs mtime mismatch")]
+ fn incremental_build_script_execution_got_new_mtime_and_cargo_check() {
+     // See https://github.com/rust-lang/cargo/issues/16104
+     let p = project()
+diff --git a/src/tools/cargo/tests/testsuite/freshness_checksum.rs b/src/tools/cargo/tests/testsuite/freshness_checksum.rs
+--- a/src/tools/cargo/tests/testsuite/freshness_checksum.rs
++++ b/src/tools/cargo/tests/testsuite/freshness_checksum.rs
+@@ -2965,6 +2965,7 @@
+ }
+ 
+ #[cargo_test(nightly, reason = "requires -Zchecksum-hash-algorithm")]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs mtime mismatch")]
+ fn incremental_build_script_execution_got_new_mtime_and_cargo_check() {
+     // See https://github.com/rust-lang/cargo/issues/16104
+     let p = project()
+diff --git a/src/tools/cargo/tests/testsuite/git.rs b/src/tools/cargo/tests/testsuite/git.rs
+--- a/src/tools/cargo/tests/testsuite/git.rs
++++ b/src/tools/cargo/tests/testsuite/git.rs
+@@ -4269,6 +4269,7 @@
+ 
+ #[cargo_test]
+ #[cfg(unix)]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support FIFO")]
+ fn simple_with_fifo() {
+     let git_project = git::new("foo", |project| {
+         project
+diff --git a/src/tools/cargo/tests/testsuite/git_auth.rs b/src/tools/cargo/tests/testsuite/git_auth.rs
+--- a/src/tools/cargo/tests/testsuite/git_auth.rs
++++ b/src/tools/cargo/tests/testsuite/git_auth.rs
+@@ -347,6 +347,7 @@
+ }
+ 
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "ssh/network not available")]
+ fn net_err_suggests_fetch_with_cli() {
+     let p = project()
+         .file(
+diff --git a/src/tools/cargo/tests/testsuite/help.rs b/src/tools/cargo/tests/testsuite/help.rs
+--- a/src/tools/cargo/tests/testsuite/help.rs
++++ b/src/tools/cargo/tests/testsuite/help.rs
+@@ -108,6 +108,7 @@
+ }
+ 
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "man/less not available")]
+ fn help_man() {
+     // Checks that `help command` displays the man page using the given command.
+     help_with_man("man");
+@@ -119,6 +120,7 @@
+ }
+ 
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "man/less not available")]
+ fn help_alias() {
+     // Check that `help some_alias` will resolve.
+     help_with_man_and_path("", "b", "build", Path::new(""));
+diff --git a/src/tools/cargo/tests/testsuite/install.rs b/src/tools/cargo/tests/testsuite/install.rs
+--- a/src/tools/cargo/tests/testsuite/install.rs
++++ b/src/tools/cargo/tests/testsuite/install.rs
+@@ -698,6 +698,7 @@
+ 
+ #[cargo_test]
+ #[cfg(target_os = "linux")]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs is case-insensitive")]
+ fn install_path_with_lowercase_cargo_toml() {
+     let toml = paths::root().join("cargo.toml");
+     fs::write(toml, "").unwrap();
+@@ -1204,6 +1205,7 @@
+ 
+ #[cargo_test]
+ #[cfg(target_os = "linux")]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs is case-insensitive")]
+ fn git_repo_with_lowercase_cargo_toml() {
+     let p = git::repo(&paths::root().join("foo"))
+         .file("cargo.toml", &basic_manifest("foo", "0.1.0"))
+@@ -2549,6 +2551,7 @@
+ }
+ 
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs case-insensitive")]
+ fn failed_install_retains_temp_directory() {
+     // Verifies that the temporary directory persists after a build failure.
+     Package::new("foo", "0.0.1")
+diff --git a/src/tools/cargo/tests/testsuite/jobserver.rs b/src/tools/cargo/tests/testsuite/jobserver.rs
+--- a/src/tools/cargo/tests/testsuite/jobserver.rs
++++ b/src/tools/cargo/tests/testsuite/jobserver.rs
+@@ -113,6 +113,7 @@
+ }
+ 
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "make not available")]
+ fn runner_inherits_jobserver() {
+     let make = make_exe();
+     if Command::new(make).arg("--version").output().is_err() {
+@@ -382,6 +383,7 @@
+ }
+ 
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "make not available")]
+ fn jobserver_and_j() {
+     let make = make_exe();
+     if !is_ci() && Command::new(make).arg("--version").output().is_err() {
+diff --git a/src/tools/cargo/tests/testsuite/package.rs b/src/tools/cargo/tests/testsuite/package.rs
+--- a/src/tools/cargo/tests/testsuite/package.rs
++++ b/src/tools/cargo/tests/testsuite/package.rs
+@@ -7460,6 +7460,7 @@
+ 
+ #[cargo_test]
+ #[cfg(unix)]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs does not support FIFO")]
+ fn simple_with_fifo() {
+     let p = project()
+         .file(
+diff --git a/src/tools/cargo/tests/testsuite/registry.rs b/src/tools/cargo/tests/testsuite/registry.rs
+--- a/src/tools/cargo/tests/testsuite/registry.rs
++++ b/src/tools/cargo/tests/testsuite/registry.rs
+@@ -3086,6 +3086,7 @@
+ }
+ 
+ #[cargo_test(ignore_windows = "On Windows setting file attributes is a bit complicated")]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs chmod EPERM")]
+ fn inaccessible_registry_cache_still_works() {
+     Package::new("foo", "0.1.0").publish();
+     Package::new("fo2", "0.1.0").publish();
+@@ -4359,6 +4360,7 @@
+ 
+ #[cfg(unix)]
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs chmod EPERM")]
+ fn set_mask_during_unpacking() {
+     use std::os::unix::fs::MetadataExt;
+ 
+@@ -4414,6 +4416,7 @@
+ }
+ 
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs chmod EPERM")]
+ fn unpack_again_when_cargo_ok_is_unrecognized() {
+     Package::new("bar", "1.0.0").publish();
+ 
+@@ -4697,6 +4700,7 @@
+ }
+ 
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs symlink limitation")]
+ fn symlink_and_directory() {
+     // Tests for symlink and directory entry in a tar file. The tar crate
+     // would incorrectly change the permissions of the symlink destination,
+diff --git a/src/tools/cargo/tests/testsuite/rustc_info_cache.rs b/src/tools/cargo/tests/testsuite/rustc_info_cache.rs
+--- a/src/tools/cargo/tests/testsuite/rustc_info_cache.rs
++++ b/src/tools/cargo/tests/testsuite/rustc_info_cache.rs
+@@ -11,6 +11,7 @@
+ const UPDATE: &str = "[..]updated rustc info cache[..]";
+ 
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs chmod EPERM")]
+ fn rustc_info_cache() {
+     let p = project()
+         .file("src/main.rs", r#"fn main() { println!("hello"); }"#)
+@@ -106,6 +107,7 @@
+ }
+ 
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs chmod EPERM")]
+ fn rustc_info_cache_with_wrappers() {
+     let wrapper_project = project()
+         .at("wrapper")
+diff --git a/src/tools/cargo/tests/testsuite/rustup.rs b/src/tools/cargo/tests/testsuite/rustup.rs
+--- a/src/tools/cargo/tests/testsuite/rustup.rs
++++ b/src/tools/cargo/tests/testsuite/rustup.rs
+@@ -148,6 +148,7 @@
+ }
+ 
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "rustup not available")]
+ fn typical_rustup() {
+     // Test behavior under a typical rustup setup with a normal toolchain.
+     let RustupEnvironment {
+@@ -195,6 +196,7 @@
+ // sysroot_libdir, which is actually `bin`, preventing the test from
+ // overriding the bin directory.
+ #[cargo_test(ignore_windows = "PATH can't be overridden on Windows")]
++#[cfg_attr(target_env = "ohos", ignore = "rustup not available")]
+ fn custom_calls_other_cargo() {
+     // Test behavior when a custom subcommand tries to manipulate PATH to use
+     // a different toolchain.
+diff --git a/src/tools/cargo/tests/testsuite/test.rs b/src/tools/cargo/tests/testsuite/test.rs
+--- a/src/tools/cargo/tests/testsuite/test.rs
++++ b/src/tools/cargo/tests/testsuite/test.rs
+@@ -3943,6 +3943,7 @@
+ }
+ 
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs chmod EPERM")]
+ fn cargo_test_env() {
+     let rustc_host = rustc_host();
+     let src = format!(
+diff --git a/src/tools/cargo/tests/testsuite/vendor.rs b/src/tools/cargo/tests/testsuite/vendor.rs
+--- a/src/tools/cargo/tests/testsuite/vendor.rs
++++ b/src/tools/cargo/tests/testsuite/vendor.rs
+@@ -1821,6 +1821,7 @@
+ 
+ #[cargo_test]
+ #[cfg(unix)]
++#[cfg_attr(target_env = "ohos", ignore = "hmdfs chmod EPERM")]
+ fn vendor_preserves_permissions() {
+     use std::os::unix::fs::MetadataExt;
+ 
+@@ -2049,6 +2050,7 @@
+ }
+ 
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "network not available")]
+ fn error_downloading() {
+     // Tests the error message when downloading packages.
+     let p = project()
+diff --git a/src/tools/cargo/tests/testsuite/version.rs b/src/tools/cargo/tests/testsuite/version.rs
+--- a/src/tools/cargo/tests/testsuite/version.rs
++++ b/src/tools/cargo/tests/testsuite/version.rs
+@@ -50,6 +50,7 @@
+ }
+ 
+ #[cargo_test]
++#[cfg_attr(target_env = "ohos", ignore = "snapshot mismatch (commit-info)")]
+ fn verbose() {
+     // This is mainly to check that it doesn't explode.
+     cargo_process("-vV")
