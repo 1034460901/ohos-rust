@@ -41,6 +41,7 @@ ENV AARCH64_UNKNOWN_LINUX_OHOS_OPENSSL_DIR=/opt/ohos-openssl/prelude/arm64-v8a
 ENV AARCH64_UNKNOWN_LINUX_OHOS_OPENSSL_NO_VENDOR=1
 
 ENV TARGETS=aarch64-unknown-linux-ohos
+ENV CHANNEL=nightly
 
 ENV \
     CC_aarch64_unknown_linux_ohos=/usr/local/bin/aarch64-unknown-linux-ohos-clang.sh \
