@@ -35,6 +35,52 @@ else
 fi
 
 # ========================================
+# 系统包检测
+# ========================================
+echo "=== 检测系统依赖 ==="
+
+if command -v dpkg >/dev/null 2>&1; then
+    REQUIRED_PACKAGES="g++ make ninja-build file curl ca-certificates python3 git cmake patch perl xz-utils unzip pkg-config ccache"
+    OPTIONAL_PACKAGES="sudo gdb libssl-dev"
+    missing_required=""
+    missing_optional=""
+
+    for pkg in $REQUIRED_PACKAGES; do
+        if ! dpkg -s "$pkg" >/dev/null 2>&1; then
+            missing_required="$missing_required $pkg"
+        fi
+    done
+
+    for pkg in $OPTIONAL_PACKAGES; do
+        if ! dpkg -s "$pkg" >/dev/null 2>&1; then
+            missing_optional="$missing_optional $pkg"
+        fi
+    done
+
+    if [ -n "$missing_optional" ]; then
+        echo "  [WARN] 可选包缺失:$missing_optional"
+        echo "         (不影响核心构建，但部分功能可能不可用)"
+    fi
+
+    if [ -n "$missing_required" ]; then
+        echo "  [ERROR] 缺少必需系统包:$missing_required"
+        echo ""
+        echo "  请安装:"
+        echo "    sudo apt-get install -y$missing_required"
+        echo ""
+        echo "  或使用 Docker 构建 (CI 自动处理依赖):"
+        echo "    docker build -f x86_64/Dockerfile -t rust-ohos-x86_64 ."
+        echo "    docker run --rm -v \$(pwd):/workspace rust-ohos-x86_64 ./x86_64/build.sh"
+        exit 1
+    fi
+
+    echo "  [OK] 所有必需包已安装"
+else
+    echo "  [SKIP] 非 Debian/Ubuntu 系统 (dpkg 不可用)，跳过包检测"
+    echo "         请确保已安装等效的编译工具链"
+fi
+
+# ========================================
 # 本地环境检测与设置
 # ========================================
 # Docker 构建时环境已由 Dockerfile 设置好，本地构建时自动检测并补全
