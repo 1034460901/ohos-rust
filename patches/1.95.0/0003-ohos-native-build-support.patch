@@ -830,7 +830,7 @@ diff --git a/vendor/libffi-sys-4.1.0/libffi/config.sub b/vendor/libffi-sys-4.1.0
 
 --- a/src/bootstrap/src/core/build_steps/llvm.rs
 +++ b/src/bootstrap/src/core/build_steps/llvm.rs
-@@ -871,6 +871,10 @@
+@@ -871,8 +871,20 @@
          }
      }
  
@@ -841,6 +841,16 @@ diff --git a/vendor/libffi-sys-4.1.0/libffi/config.sub b/vendor/libffi-sys-4.1.0
      cfg.define("CMAKE_SHARED_LINKER_FLAGS", &ldflags.shared);
      cfg.define("CMAKE_MODULE_LINKER_FLAGS", &ldflags.module);
      cfg.define("CMAKE_EXE_LINKER_FLAGS", &ldflags.exe);
+ 
++    if target.contains("ohos") {
++        // cmake --install rewrites RPATH (build -> install), invalidating the
++        // .codesign hash from -Wl,--code-sign. Use install RPATH at build
++        // time so no post-link modification occurs.
++        cfg.define("CMAKE_BUILD_WITH_INSTALL_RPATH", "ON");
++        cfg.define("CMAKE_INSTALL_RPATH", "$ORIGIN/../lib");
++    }
++
+     if env::var_os("SCCACHE_ERROR_LOG").is_some() {
 diff --git a/src/tools/cargo/crates/cargo-test-support/src/git.rs b/src/tools/cargo/crates/cargo-test-support/src/git.rs
 --- a/src/tools/cargo/crates/cargo-test-support/src/git.rs
 +++ b/src/tools/cargo/crates/cargo-test-support/src/git.rs
