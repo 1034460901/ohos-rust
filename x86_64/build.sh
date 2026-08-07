@@ -556,6 +556,17 @@ if [ -f "$SRC_DIR/build/dist/$RA_PACKAGE" ]; then
             cp -r bin/* "$RA_INSTALL_DIR/bin/" 2>/dev/null || true
         fi
         
+        # rust-analyzer 动态链接 librustc_driver-*.so (RUNPATH: $ORIGIN/../lib)
+        # 独立包默认只含 bin/，缺少 lib/ → 运行时找不到 librustc_driver
+        # 从主工具链安装目录复制 librustc_driver-*.so 到独立包 lib/
+        mkdir -p "$RA_INSTALL_DIR/lib"
+        for drv in "$RUST_INSTALL_DIR/lib"/librustc_driver-*.so; do
+            if [ -f "$drv" ]; then
+                cp "$drv" "$RA_INSTALL_DIR/lib/"
+                echo "  已打包 librustc_driver: $(basename "$drv")"
+            fi
+        done
+        
         cd $WORKDIR
         tar -zcf "$RA_PACKAGE" -C "$RA_INSTALL_DIR" .
         echo "=== rust-analyzer 独立包处理完成: $RA_PACKAGE ==="
