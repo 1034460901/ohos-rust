@@ -53,7 +53,11 @@ if [[ -z "$SRC_DIR" ]]; then
     SRC_DIR="${WORKDIR}/rustc-${RUST_VERSION}-src/build/dist"
 fi
 
-PKG_VERSION="${CHANNEL}"
+if [[ "$CHANNEL" == "stable" ]]; then
+    PKG_VERSION="$RUST_VERSION"
+else
+    PKG_VERSION="$CHANNEL"
+fi
 RA_TARBALL="${SRC_DIR}/rust-analyzer-${PKG_VERSION}-${TARGET}.tar.xz"
 RUST_TARBALL="${SRC_DIR}/rust-${PKG_VERSION}-${TARGET}.tar.xz"
 OUTPUT_DIR="${WORKDIR}"
