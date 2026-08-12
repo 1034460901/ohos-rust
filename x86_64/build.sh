@@ -358,6 +358,7 @@ rm -f bootstrap.toml
     --enable-sanitizers \
     --enable-extended \
     --enable-sccache \
+    --enable-lld \
     --set dist.vendor=false \
     --set rust.deny-warnings=false \
     \
@@ -371,7 +372,8 @@ rust-analyzer-proc-macro-srv,\
 src,\
 rust-demangler,\
 llvm-tools,\
-miri
+miri,\
+wasm-component-ld
 
 # ========================================
 # 构建步骤
