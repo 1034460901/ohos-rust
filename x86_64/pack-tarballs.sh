@@ -52,6 +52,8 @@ done
 if [[ -z "$SRC_DIR" ]]; then
     SRC_DIR="${WORKDIR}/rustc-${RUST_VERSION}-src/build/dist"
 fi
+# Convert to absolute path (needed because script cd's to TMP_DIR later)
+SRC_DIR="$(cd "$SRC_DIR" 2>/dev/null && pwd)"
 
 if [[ "$CHANNEL" == "stable" ]]; then
     PKG_VERSION="$RUST_VERSION"
