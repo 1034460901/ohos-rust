@@ -1,0 +1,38 @@
+--- a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform.h
++++ b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform.h
+@@ -136,6 +136,12 @@
+ #  define SANITIZER_ANDROID 0
+ #endif
+ 
++#if defined(__OHOS__)
++#  define SANITIZER_OHOS 1
++#else
++#  define SANITIZER_OHOS 0
++#endif
++
+ #if defined(__Fuchsia__)
+ #  define SANITIZER_FUCHSIA 1
+ #else
+--- a/src/llvm-project/compiler-rt/lib/asan/asan_allocator.h
++++ b/src/llvm-project/compiler-rt/lib/asan/asan_allocator.h
+@@ -205,7 +205,8 @@
+ #      endif
+ typedef DefaultSizeClassMap SizeClassMap;
+ #    elif defined(__aarch64__) && \
+-        (SANITIZER_ANDROID || defined(SANITIZER_AARCH64_39BIT_VA))
++        (SANITIZER_ANDROID || defined(SANITIZER_AARCH64_39BIT_VA) || \
++         SANITIZER_OHOS)
+ // Android needs to support 39, 42 and 48 bit VMA.
+ const uptr kAllocatorSize  =  0x2000000000ULL;  // 128G.
+ typedef VeryCompactSizeClassMap SizeClassMap;
+--- a/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h
++++ b/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h
+@@ -75,7 +75,7 @@
+   static const uptr kSpaceSize = 1ULL << kAddressTagShift;
+   typedef __sanitizer::DefaultSizeClassMap SizeClassMap;
+ #elif SANITIZER_LINUX && !SANITIZER_ANDROID && \
+-    !defined(SANITIZER_AARCH64_39BIT_VA)
++    !defined(SANITIZER_AARCH64_39BIT_VA) && !SANITIZER_OHOS
+   static const uptr kSpaceSize = 0x40000000000ULL;  // 4T.
+   typedef __sanitizer::DefaultSizeClassMap SizeClassMap;
+ #else
