@@ -308,7 +308,10 @@ if [ ! -f "$PATCH_MARKER" ]; then
     for PATCH_FILE in "$PATCH_DIR"/*.patch; do
         if [ -f "$PATCH_FILE" ]; then
             echo "应用 patch: $(basename "$PATCH_FILE")"
-            patch -p1 --forward < "$PATCH_FILE" || true
+            if ! patch -p1 --forward < "$PATCH_FILE"; then
+                echo "错误: patch 应用失败: $(basename "$PATCH_FILE")"
+                exit 1
+            fi
         fi
     done
 
@@ -330,6 +333,14 @@ with open('$checksum_file', 'w') as f:
 "
         fi
     done
+
+    # 验证无 .rej 文件（patch 全部应用成功）
+    REJ_FILES=$(find . -name "*.rej" -type f 2>/dev/null)
+    if [ -n "$REJ_FILES" ]; then
+        echo "错误: 发现 patch 拒绝文件，说明 patch 未完全应用:"
+        echo "$REJ_FILES"
+        exit 1
+    fi
 
     touch "$PATCH_MARKER"
     echo "=== Patches 应用完成 ==="
