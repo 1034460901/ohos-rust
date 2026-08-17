@@ -163,13 +163,13 @@ tar -zcf rust-$RUST_VERSION-ohos-arm64.tar.gz rust-$RUST_VERSION-ohos-arm64
 ```
 **影响分析**：提取官方生成的 rust tarball 内容，只是重新打包格式不同，内容完全相同，不会影响最终产物。
 
-### 7. ✅ 【完全相同】代码签名
+### 7. ✅ 【已改进】代码签名
 ```bash
-# 官方 CI 和本脚本都使用相同的签名方式
-# 来源：../ohos-python/build.sh
-/opt/ohos-sdk/ohos/toolchains/lib/binary-sign-tool sign -inFile "$FILE" -outFile "$FILE" -selfSign 1
+# 本脚本使用 -Wl,--code-sign 链接器标志，在链接时自动生成 .codesign 节区
+# 官方 CI 使用 binary-sign-tool 后签名（旧方案）
+# 来源：patches/1.95.0/0001-rustc-ohos-auto-sign-fix.patch
 ```
-**影响分析**：完全相同的签名方式，不会影响最终产物。
+**影响分析**：签名在链接时自动完成，无需外部工具后处理。生成相同的 `.codesign` 节区（SHA-256 内容哈希），OHOS 内核验证通过。
 
 ## 相同点（完全模拟官方 CI）
 
@@ -221,6 +221,6 @@ tar -zcf rust-$RUST_VERSION-ohos-arm64.tar.gz rust-$RUST_VERSION-ohos-arm64
 ✅ **配置方式**：完全相同的配置参数
 ✅ **构建命令**：完全相同的构建命令
 ✅ **产物处理**：：提取官方产物内容，只是重新打包
-✅ **代码签名**：完全相同的签名方式
+✅ **代码签名**：改用 `-Wl,--code-sign` 链接时签名（替代旧 binary-sign-tool 后签名）
 
 这些差异是为了适配鸿蒙环境，但构建逻辑和参数设置与官方 CI 完全一致，**不会影响最终的 Rust 工具链功能和兼容性**。
