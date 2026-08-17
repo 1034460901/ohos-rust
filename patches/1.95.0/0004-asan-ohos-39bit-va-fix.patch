@@ -1,4 +1,4 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2000
+﻿From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2000
 From: OHOS Rust <ohos-rust@example.com>
 Date: Thu, 13 Aug 2026 00:00:00 +0000
 Subject: [PATCH] OHOS sanitizer: ASAN/HWASAN 39-bit VA + clang/sysroot/sysinfo fixes
@@ -109,7 +109,7 @@ Combined sanitizer fixes for OHOS aarch64 (39-bit VA):
      }
      if builder.config.llvm_clang_cl.is_some() {
          cxxflags.push(format!(" --target={target}"));
-@@ -871,6 +887,13 @@
+@@ -871,8 +887,14 @@
          }
      }
  
@@ -117,9 +117,12 @@ Combined sanitizer fixes for OHOS aarch64 (39-bit VA):
 +        ldflags.push_all(format!(" --target={target}"));
 +        ldflags.push_all(" --sysroot=/opt/ohos-sdk/native/sysroot");
 +        ldflags.push_all(" -fuse-ld=lld");
-+        ldflags.push_all("-Wl,--code-sign");
 +    }
 +
+     if target.contains("ohos") {
+         ldflags.push_all("-Wl,--code-sign");
+     }
+ 
      cfg.define("CMAKE_SHARED_LINKER_FLAGS", &ldflags.shared);
      cfg.define("CMAKE_MODULE_LINKER_FLAGS", &ldflags.module);
      cfg.define("CMAKE_EXE_LINKER_FLAGS", &ldflags.exe);
