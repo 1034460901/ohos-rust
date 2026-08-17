@@ -282,7 +282,7 @@ if [ ! -d "$SRC_DIR" ]; then
             exit 1
         fi
     fi
-    tar -zxf "rustc-$RUST_VERSION-src.tar.gz" -C "$WORKDIR"
+    tar -zxf "$WORKDIR/rustc-$RUST_VERSION-src.tar.gz" -C "$WORKDIR"
 else
     echo "=== 源码已存在，跳过下载: $SRC_DIR ==="
 fi
