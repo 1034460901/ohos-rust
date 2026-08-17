@@ -204,6 +204,7 @@ exec /opt/ohos-sdk/ohos/native/llvm/bin/clang \
   -target aarch64-linux-ohos \
   --sysroot=/opt/ohos-sdk/ohos/native/sysroot \
   -D__MUSL__ \
+  -Wl,--code-sign \
   "$@"
 EOF
 chmod +x /opt/aarch64-unknown-linux-ohos-clang.sh
@@ -214,6 +215,7 @@ exec /opt/ohos-sdk/ohos/native/llvm/bin/clang++ \
   -target aarch64-linux-ohos \
   --sysroot=/opt/ohos-sdk/ohos/native/sysroot \
   -D__MUSL__ \
+  -Wl,--code-sign \
   "$@"
 EOF
 chmod +x /opt/aarch64-unknown-linux-ohos-clang++.sh
@@ -303,40 +305,7 @@ echo "=== 复制依赖库到安装目录 ==="
 cp /opt/deps/lib/*so* "$RUST_INSTALL_DIR/lib/"
 cp /opt/deps/lib/*so* /opt/rust-$RUST_VERSION-ohos-arm64/lib
 
-# 进行代码签名
-echo "=== 代码签名 ==="
-cd "$RUST_INSTALL_DIR"
-
-SIGN_TOOL="/opt/ohos-sdk/ohos/toolchains/lib/binary-sign-tool"
-if [ ! -f "$SIGN_TOOL" ]; then
-    echo "✗ 签名工具不存在: $SIGN_TOOL"
-    exit 1
-fi
-
-chmod +x "$SIGN_TOOL"
-echo "使用签名工具: $SIGN_TOOL"
-
-# 签名所有 ELF 文件
-find . -type f | while read -r FILE; do
-    # 检查是否为 ELF 文件
-    if file -b "$FILE" | grep -qiE "elf"; then
-        echo "Signing: $FILE"
-        ORIG_PERM=$(stat -c %a "$FILE")
-        chmod +w "$FILE"
-
-        SIGNED_TMP="${FILE}.signed"
-        if "$SIGN_TOOL" sign -inFile "$FILE" -outFile "$SIGNED_TMP" -selfSign 1; then
-            mv "$SIGNED_TMP" "$FILE"
-            chmod "$ORIG_PERM" "$FILE"
-        else
-            echo "✗ Failed to sign: $FILE"
-            rm -f "$SIGNED_TMP"
-            exit 1
-        fi
-    fi
-done
-[ $? -ne 0 ] && exit 1
-cd $WORKDIR
+echo "=== .codesign 已通过 -Wl,--code-sign 链接器标志自动生成 ==="
 
 # 履行开源义务，把使用的开源软件的 license 全部聚合起来放到制品中
 echo "=== 生成 license 文件 ==="
@@ -365,10 +334,6 @@ EOF
 # 打包最终产物
 echo "=== 打包最终产物 ==="
 cp -r "$RUST_INSTALL_DIR" ./
-
-# 将工具目录下的签名工具打包进去
-mkdir -p ./rust-$RUST_VERSION-ohos-arm64/tool
-cp $WORKDIR/tool/binary-sign-tool ./rust-$RUST_VERSION-ohos-arm64/tool/
 
 tar -zcf rust-$RUST_VERSION-aarch64-unknown-linux-ohos.tar.gz rust-$RUST_VERSION-ohos-arm64
 
