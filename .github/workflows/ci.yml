@@ -21,7 +21,7 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "DRY_RUN mode (skip compilation, test signing only)"
+        description: "DRY_RUN mode (skip compilation, generate mock artifacts only)"
         required: false
         default: false
         type: boolean
