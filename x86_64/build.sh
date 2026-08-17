@@ -1,4 +1,4 @@
-#!/bin/sh
+﻿#!/bin/sh
 set -e
 
 # 自动定位仓库根目录(脚本位于 x86_64/ 下,仓库根为上一级)
@@ -308,7 +308,12 @@ if [ ! -f "$PATCH_MARKER" ]; then
     for PATCH_FILE in "$PATCH_DIR"/*.patch; do
         if [ -f "$PATCH_FILE" ]; then
             echo "应用 patch: $(basename "$PATCH_FILE")"
-            patch -p1 --forward < "$PATCH_FILE" || true
+            if ! patch -p1 --forward < "$PATCH_FILE"; then
+                echo "✗ patch 应用失败: $(basename "$PATCH_FILE")" >&2
+                echo "  请检查 patch 上下文是否与 Rust $RUST_VERSION 源码匹配" >&2
+                echo "  可能原因: 前序 patch 修改了同一区域导致上下文偏移" >&2
+                exit 1
+            fi
         fi
     done
 
@@ -330,6 +335,42 @@ with open('$checksum_file', 'w') as f:
 "
         fi
     done
+
+    # 验证关键 patch 标记（防止静默失败）
+    echo "=== 验证 patch 应用结果 ==="
+    PATCH_VERIFY_OK=true
+
+    # 0004: SANITIZER_OHOS 宏 (sanitizer_platform.h)
+    if ! grep -q "SANITIZER_OHOS" "$SRC_DIR/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform.h" 2>/dev/null; then
+        echo "✗ 验证失败: sanitizer_platform.h 中未找到 SANITIZER_OHOS 宏" >&2
+        PATCH_VERIFY_OK=false
+    fi
+
+    # 0004: asan_allocator.h 中 SANITIZER_OHOS (128GB allocator)
+    if ! grep -q "SANITIZER_OHOS" "$SRC_DIR/src/llvm-project/compiler-rt/lib/asan/asan_allocator.h" 2>/dev/null; then
+        echo "✗ 验证失败: asan_allocator.h 中未找到 SANITIZER_OHOS（ASAN 仍将使用 4TB allocator）" >&2
+        PATCH_VERIFY_OK=false
+    fi
+
+    # 0004: bootstrap/llvm.rs 中 OHOS SDK clang 覆盖
+    if ! grep -q '/opt/ohos-sdk/native/llvm/bin' "$SRC_DIR/src/bootstrap/src/core/build_steps/llvm.rs" 2>/dev/null; then
+        echo "✗ 验证失败: llvm.rs 中未找到 OHOS SDK clang 覆盖" >&2
+        echo "  compiler-rt 构建将不会定义 __OHOS__，ASAN 走 4TB 方案" >&2
+        PATCH_VERIFY_OK=false
+    fi
+
+    # 0004: bootstrap/llvm.rs 中 --sysroot（确保 clang 使用 OHOS 头文件）
+    if ! grep -q 'sysroot=/opt/ohos-sdk/native/sysroot' "$SRC_DIR/src/bootstrap/src/core/build_steps/llvm.rs" 2>/dev/null; then
+        echo "✗ 验证失败: llvm.rs 中未找到 --sysroot 参数" >&2
+        PATCH_VERIFY_OK=false
+    fi
+
+    if [ "$PATCH_VERIFY_OK" != "true" ]; then
+        echo "" >&2
+        echo "✗ Patch 验证失败，关键修改未生效。请检查 patch 文件。" >&2
+        exit 1
+    fi
+    echo "✓ 所有 patch 验证通过"
 
     touch "$PATCH_MARKER"
     echo "=== Patches 应用完成 ==="
