@@ -1,0 +1,302 @@
+diff --git a/src/bootstrap/bootstrap.py b/src/bootstrap/bootstrap.py
++++ b/src/bootstrap/bootstrap.py
++++ /home/zqz/ohos-rust/rustc-1.89.0-src/src/bootstrap/bootstrap.py	2026-08-25 18:03:33.125020932 +0800
+@@ -326,12 +326,14 @@
+     # Consider the direct transformation first and then the special cases
+     if kernel in kerneltype_mapper:
+         kernel = kerneltype_mapper[kernel]
+-    elif kernel == "Linux":
++    elif kernel == "Linux" or kernel == "HarmonyOS":
+         # Apple doesn't support `-o` so this can't be used in the combined
+         # uname invocation above
+         ostype = require(["uname", "-o"], exit=required).decode(default_encoding)
+         if ostype == "Android":
+             kernel = "linux-android"
++        elif kernel == "HarmonyOS":
++            kernel = "unknown-linux-ohos"
+         else:
+             kernel = "unknown-linux-gnu"
+     elif kernel == "SunOS":
+@@ -747,7 +749,7 @@
+                     return False
+                 raise reason
+ 
+-            if ostype != "Linux":
++            if ostype not in ("Linux", "HarmonyOS"):
+                 return False
+ 
+             # If the user has explicitly indicated whether binaries should be
+diff --git a/src/bootstrap/src/bin/rustc.rs b/src/bootstrap/src/bin/rustc.rs
++++ b/src/bootstrap/src/bin/rustc.rs
++++ /home/zqz/ohos-rust/rustc-1.89.0-src/src/bootstrap/src/bin/rustc.rs	2026-08-25 18:03:33.125351332 +0800
+@@ -16,6 +16,7 @@
+ //! never get replaced.
+ 
+ use std::env;
++use std::ffi::OsString;
+ use std::path::{Path, PathBuf};
+ use std::process::{Child, Command};
+ use std::time::Instant;
+@@ -110,6 +111,113 @@
+         }
+     }
+ 
++    let is_test = args.iter().any(|a| a == "--test");
++
++    // When testing std at stage 0, the sysroot contains pre-compiled std
++    // (core, alloc, etc.) from the initial compiler. Building std from source
++    // would create duplicate lang items with the sysroot's pre-compiled
++    // versions. We solve this by swapping out lib.rs with lib.miri.rs for
++    // library builds (not test builds). The lib.miri.rs files re-export the
++    // sysroot crate, avoiding duplicate lang items, while test builds still
++    // use the original lib.rs so tests can access the crate's internals.
++    // This is the same mechanism used by Miri testing.
++    //
++    // Since lib.miri.rs uses `extern crate core as realcore` (etc.), we need
++    // to ensure that the `extern crate` imports resolve to the sysroot's
++    // pre-compiled crates, not the source-built wrappers. We do this by
++    // passing --extern flags pointing to the sysroot's .rlib files for the
++    // specific crates that use lib.miri.rs replacements.
++    //
++    // IMPORTANT: The lib.rs → lib.miri.rs swap must happen BEFORE
++    // cmd.args(&args), because once args are passed to cmd, modifying args
++    // has no effect on the actual command.
++    let replace_librs = env::var_os("STAGE0_REPLACE_LIBRS_IF_NOT_TEST").is_some() && !is_test;
++    if replace_librs {
++        // Swap lib.rs with lib.miri.rs for library builds
++        for arg in &mut args {
++            let path = Path::new(arg);
++            if path.file_name().is_some_and(|f| f == "lib.rs") {
++                let miri_rs = path.with_extension("miri.rs");
++                if path.is_file() && miri_rs.is_file() {
++                    *arg = miri_rs.into_os_string();
++                }
++            }
++        }
++
++        // For std crates using lib.miri.rs wrappers, replace cargo's
++        // --extern paths with sysroot .rmeta paths. The lib.miri.rs
++        // files use `extern crate core as realcore` (etc.) which must
++        // resolve to the sysroot's pre-compiled crates. We replace
++        // cargo's --extern values in args (not append new ones) to
++        // avoid "multiple candidates" errors.
++        let needs_sysroot_extern = crate_name.is_some_and(|name| {
++            matches!(name, "core" | "alloc" | "std" | "compiler_builtins")
++        });
++        if needs_sysroot_extern {
++            let target_triple = parse_value_from_args(&orig_args, "--target");
++            if let Some(triple) = &target_triple {
++                let sysroot_path = PathBuf::from(&sysroot);
++                let sysroot_target_lib = sysroot_path.join("lib").join("rustlib").join(triple).join("lib");
++                if sysroot_target_lib.is_dir() {
++                    // Build a map of crate name -> sysroot .rmeta path
++                    let mut sysroot_rmeta_paths: std::collections::HashMap<&str, PathBuf> =
++                        std::collections::HashMap::new();
++                    for extern_crate in ["core", "alloc", "std", "compiler_builtins"] {
++                        if let Ok(entries) = std::fs::read_dir(&sysroot_target_lib) {
++                            for entry in entries.flatten() {
++                                let path = entry.path();
++                                let fname = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
++                                if fname.starts_with(&format!("lib{extern_crate}-"))
++                                    && fname.ends_with(".rmeta")
++                                {
++                                    sysroot_rmeta_paths.insert(extern_crate, path);
++                                    break;
++                                }
++                            }
++                        }
++                    }
++
++                    // Replace cargo's --extern paths with sysroot .rmeta paths
++                    // Handle both forms: --extern core=/path/... and --extern /path/...
++                    // Collect replacements first to avoid borrow checker conflicts.
++                    let mut replacements: Vec<(usize, OsString)> = Vec::new();
++                    let mut i = 0;
++                    while i < args.len() {
++                        let arg_str = args[i].to_string_lossy().into_owned();
++                        if arg_str == "--extern" && i + 1 < args.len() {
++                            let next_str = args[i + 1].to_string_lossy().into_owned();
++                            for crate_name_str in ["core", "alloc", "std", "compiler_builtins"] {
++                                if let Some(sysroot_path) = sysroot_rmeta_paths.get(crate_name_str) {
++                                    let prefix = format!("{crate_name_str}=");
++                                    if next_str.starts_with(&prefix) {
++                                        replacements.push((i + 1, format!("{crate_name_str}={}", sysroot_path.display()).into()));
++                                    }
++                                }
++                            }
++                            i += 2;
++                        } else if arg_str.starts_with("--extern=") {
++                            for crate_name_str in ["core", "alloc", "std", "compiler_builtins"] {
++                                if let Some(sysroot_path) = sysroot_rmeta_paths.get(crate_name_str) {
++                                    let prefix = format!("--extern={crate_name_str}=");
++                                    if arg_str.starts_with(&prefix) {
++                                        replacements.push((i, format!("--extern={crate_name_str}={}", sysroot_path.display()).into()));
++                                    }
++                                }
++                            }
++                            i += 1;
++                        } else {
++                            i += 1;
++                        }
++                    }
++                    // Apply replacements
++                    for (idx, new_val) in replacements {
++                        args[idx] = new_val;
++                    }
++                }
++            }
++        }
++    }
++
+     let mut cmd = match env::var_os("RUSTC_WRAPPER_REAL") {
+         Some(wrapper) if !wrapper.is_empty() => {
+             let mut cmd = Command::new(wrapper);
+@@ -234,7 +342,6 @@
+         cmd.arg("-Clink-args=-Wl,-q");
+     }
+ 
+-    let is_test = args.iter().any(|a| a == "--test");
+     if verbose > 2 {
+         let rust_env_vars =
+             env::vars().filter(|(k, _)| k.starts_with("RUST") || k.starts_with("CARGO"));
+diff --git a/src/bootstrap/src/core/build_steps/llvm.rs b/src/bootstrap/src/core/build_steps/llvm.rs
++++ b/src/bootstrap/src/core/build_steps/llvm.rs
++++ /home/zqz/ohos-rust/rustc-1.89.0-src/src/bootstrap/src/core/build_steps/llvm.rs	2026-08-25 18:05:23.185532782 +0800
+@@ -736,6 +736,14 @@
+         None => (builder.cc(target), builder.cxx(target).unwrap()),
+     };
+ 
++    // OHOS targets require LLD for --code-sign support; use the OHOS SDK clang
++    let (cc, cxx) = if target.contains("ohos") {
++        let sdk = std::path::Path::new("/opt/ohos-sdk/native/llvm/bin");
++        (sdk.join("clang"), sdk.join("clang++"))
++    } else {
++        (cc, cxx)
++    };
++
+     // If ccache is configured we inform the build a little differently how
+     // to invoke ccache while also invoking our compilers.
+     if use_compiler_launcher && let Some(ref ccache) = builder.config.ccache {
+@@ -769,7 +777,11 @@
+         cflags.push(s);
+     }
+     if target.contains("ohos") {
++        cflags.push(format!(" --target={target}"));
++        cflags.push(" --sysroot=/opt/ohos-sdk/native/sysroot");
+         cflags.push(" -D_LINUX_SYSINFO_H");
++        cflags.push(" -D_UAPI_LINUX_SOCKET_H");
++        cflags.push(" -fuse-ld=lld");
+     }
+     if builder.config.llvm_clang_cl.is_some() {
+         cflags.push(format!(" --target={target}"));
+@@ -792,7 +804,11 @@
+         cxxflags.push(s);
+     }
+     if target.contains("ohos") {
++        cxxflags.push(format!(" --target={target}"));
++        cxxflags.push(" --sysroot=/opt/ohos-sdk/native/sysroot");
+         cxxflags.push(" -D_LINUX_SYSINFO_H");
++        cxxflags.push(" -D_UAPI_LINUX_SOCKET_H");
++        cxxflags.push(" -fuse-ld=lld");
+     }
+     if builder.config.llvm_clang_cl.is_some() {
+         cxxflags.push(format!(" --target={target}"));
+@@ -836,10 +852,28 @@
+         }
+     }
+ 
++    if target.contains("ohos") {
++        ldflags.push_all(format!(" --target={target}"));
++        ldflags.push_all(" --sysroot=/opt/ohos-sdk/native/sysroot");
++        ldflags.push_all(" -fuse-ld=lld");
++    }
++
++    if target.contains("ohos") {
++        ldflags.push_all("-Wl,--code-sign");
++    }
++
+     cfg.define("CMAKE_SHARED_LINKER_FLAGS", &ldflags.shared);
+     cfg.define("CMAKE_MODULE_LINKER_FLAGS", &ldflags.module);
+     cfg.define("CMAKE_EXE_LINKER_FLAGS", &ldflags.exe);
+ 
++    if target.contains("ohos") {
++        // cmake --install rewrites RPATH (build -> install), invalidating the
++        // .codesign hash from -Wl,--code-sign. Use install RPATH at build
++        // time so no post-link modification occurs.
++        cfg.define("CMAKE_BUILD_WITH_INSTALL_RPATH", "ON");
++        cfg.define("CMAKE_INSTALL_RPATH", "$ORIGIN/../lib");
++    }
++
+     if env::var_os("SCCACHE_ERROR_LOG").is_some() {
+         cfg.env("RUSTC_LOG", "sccache=warn");
+     }
+diff --git a/src/bootstrap/src/core/build_steps/test.rs b/src/bootstrap/src/core/build_steps/test.rs
++++ b/src/bootstrap/src/core/build_steps/test.rs
++++ /home/zqz/ohos-rust/rustc-1.89.0-src/src/bootstrap/src/core/build_steps/test.rs	2026-08-25 18:03:33.168468532 +0800
+@@ -2690,7 +2690,15 @@
+             }
+ 
+             // Build `cargo test` command
+-            builder::Cargo::new(builder, compiler, mode, SourceType::InTree, target, builder.kind)
++            let mut cargo = builder::Cargo::new(builder, compiler, mode, SourceType::InTree, target, builder.kind);
++            // For stage 0, the sysroot contains pre-compiled std from the
++            // initial compiler. Building std from source creates duplicate
++            // lang items. We use the same approach as Miri: swap out lib.rs
++            // with lib.miri.rs for library builds (not test builds).
++            if compiler.stage == 0 {
++                cargo.env("STAGE0_REPLACE_LIBRS_IF_NOT_TEST", "1");
++            }
++            cargo
+         };
+ 
+         match mode {
+diff --git a/src/bootstrap/src/core/build_steps/dist.rs b/src/bootstrap/src/core/build_steps/dist.rs
++++ b/src/bootstrap/src/core/build_steps/dist.rs
++++ /home/zqz/ohos-rust/rustc-1.89.0-src/src/bootstrap/src/core/build_steps/dist.rs	2026-08-25 18:03:33.169444932 +0800
+@@ -1543,7 +1543,10 @@
+         }
+ 
+         add_component!("rust-docs" => Docs { host: target });
+-        add_component!("rust-json-docs" => JsonDocs { host: target });
++        // Skip JSON docs when cross-compiling: cannot execute target compiler on host.
++        if target == builder.host_target {
++            add_component!("rust-json-docs" => JsonDocs { host: target });
++        }
+         add_component!("cargo" => Cargo { compiler, target });
+         add_component!("rustfmt" => Rustfmt { compiler, target });
+         add_component!("rust-analyzer" => RustAnalyzer { compiler, target });
+diff --git a/src/bootstrap/src/core/build_steps/doc.rs b/src/bootstrap/src/core/build_steps/doc.rs
++++ b/src/bootstrap/src/core/build_steps/doc.rs
++++ /home/zqz/ohos-rust/rustc-1.89.0-src/src/bootstrap/src/core/build_steps/doc.rs	2026-08-25 18:03:33.169035732 +0800
+@@ -1081,6 +1081,10 @@
+     }
+ 
+     fn make_run(run: RunConfig<'_>) {
++        // Skip error index generation when cross-compiling.
++        if run.target != run.builder.host_target {
++            return;
++        }
+         let target = run.target;
+         run.builder.ensure(ErrorIndex { target });
+     }
+diff --git a/vendor/libffi-sys-3.3.1/libffi/config.sub b/vendor/libffi-sys-3.3.1/libffi/config.sub
++++ b/vendor/libffi-sys-3.3.1/libffi/config.sub
++++ /home/zqz/ohos-rust/rustc-1.89.0-src/vendor/libffi-sys-3.3.1/libffi/config.sub	2026-08-25 18:03:33.169866632 +0800
+@@ -1768,7 +1768,7 @@
+ 	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
+ 	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi* \
+ 	     | nsk* | powerunix* | genode* | zvmoe* | qnx* | emx* | zephyr* \
+-	     | fiwix* | mlibc* | cos* | mbr* | ironclad* )
++	     | fiwix* | mlibc* | cos* | mbr* | ironclad* | ohos* )
+ 		;;
+ 	# This one is extra strict with allowed versions
+ 	sco3.2v2 | sco3.2v[4-9]* | sco5v6*)
+@@ -1829,7 +1829,7 @@
+ case $kernel-$os-$obj in
+ 	linux-gnu*- | linux-android*- | linux-dietlibc*- | linux-llvm*- \
+ 		    | linux-mlibc*- | linux-musl*- | linux-newlib*- \
+-		    | linux-relibc*- | linux-uclibc*- )
++		    | linux-relibc*- | linux-uclibc*- | linux-ohos*- )
+ 		;;
+ 	uclinux-uclibc*- )
+ 		;;

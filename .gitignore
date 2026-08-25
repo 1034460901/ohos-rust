@@ -3,8 +3,10 @@
 *.tar.xz
 *.tar.xz.sha256
 rust-1.95.0-aarch64-unknown-linux-ohos/
+rust-1.100.0-aarch64-unknown-linux-ohos/
 rust-nightly-aarch64-unknown-linux-ohos/
 rustc-1.95.0-src/
+rustc-1.100.0-src/
 
 # Symlinks (created by build.sh)
 x86_64/patches

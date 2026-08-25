@@ -1,11 +1,5 @@
 name: CI
 
-# run-name 说明:
-# - 手动触发(workflow_dispatch): 显示 "Build Rust {版本} for OHOS"
-# - 其他触发方式: 返回空字符串，GitHub 使用默认显示规则
-#   - PR: 显示 PR 标题
-#   - Push: 显示 commit 标题
-#   - Release: 显示 release tag name
 run-name: "${{ github.event_name == 'workflow_dispatch' && format('Build Rust
   {0} for OHOS', github.event.inputs.rust_version_select == 'custom' &&
   github.event.inputs.rust_version_custom ||
@@ -79,15 +73,12 @@ jobs:
               ;;
           esac
 
-          # Determine channel from branch (nightly branch → nightly channel)
           if [ "${{ github.ref_name }}" = "nightly" ]; then
             CHANNEL="nightly"
           else
             CHANNEL="stable"
           fi
 
-          # Construct release string: stable → "1.95.0", nightly → "1.95.0-nightly"
-          # PKG_VERSION is used for tarball naming: stable → "1.95.0", nightly → "nightly"
           if [ "$CHANNEL" = "stable" ]; then
             RELEASE="$RUST_VER"
             PKG_VERSION="$RUST_VER"
@@ -102,33 +93,11 @@ jobs:
           echo "channel=$CHANNEL" >> $GITHUB_OUTPUT
           echo "=== Building Rust version: $RUST_VER (channel: $CHANNEL, release: $RELEASE) ==="
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-docker-x86_64-${{ hashFiles('x86_64/Dockerfile',
-            'x86_64/scripts/*.sh') }}
-          restore-keys: |
-            ${{ runner.os }}-docker-x86_64-
-
-      - name: Build Docker image with cache
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: x86_64/Dockerfile
-          push: false
-          load: true
-          tags: rust-ohos-x86_64
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-
-      - name: Move Docker cache
+      - name: Build Docker image
         run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          docker build -f x86_64/Dockerfile -t rust-ohos-x86_64 .
+          echo "=== Docker images ==="
+          docker images | grep rust-ohos
 
       - name: Cache sccache
         uses: actions/cache@v4
@@ -168,7 +137,6 @@ jobs:
             -w /workspace \
             rust-ohos-x86_64 sccache --stop-server 2>/dev/null || true
 
-      # 1. 上传全家桶
       - name: Upload toolchain artifact
         uses: actions/upload-artifact@v4
         with:
@@ -178,7 +146,6 @@ jobs:
             }}-aarch64-unknown-linux-ohos-cross
           retention-days: 90
 
-      # 2. 上传独立 rust-analyzer
       - name: Upload rust-analyzer artifact
         uses: actions/upload-artifact@v4
         with:

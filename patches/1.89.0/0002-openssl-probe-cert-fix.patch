@@ -1,0 +1,22 @@
+diff --git a/vendor/openssl-probe-0.1.5/src/lib.rs b/vendor/openssl-probe-0.1.5/src/lib.rs
++++ b/vendor/openssl-probe-0.1.5/src/lib.rs
++++ /home/zqz/ohos-rust/rustc-1.89.0-src/vendor/openssl-probe-0.1.5/src/lib.rs	2026-08-25 18:03:33.121884532 +0800
+@@ -115,6 +115,7 @@
+             "certs/ca-bundle.crt",
+             "CARootCertificates.pem",
+             "tls-ca-bundle.pem",
++            "certs/cacert.pem",
+         ];
+         if result.cert_file.is_none() {
+             result.cert_file = cert_filenames
+diff --git a/vendor/openssl-probe-0.1.6/src/lib.rs b/vendor/openssl-probe-0.1.6/src/lib.rs
++++ b/vendor/openssl-probe-0.1.6/src/lib.rs
++++ /home/zqz/ohos-rust/rustc-1.89.0-src/vendor/openssl-probe-0.1.6/src/lib.rs	2026-08-25 18:03:33.122076532 +0800
+@@ -180,6 +180,7 @@
+             "certs/ca-bundle.crt",
+             "CARootCertificates.pem",
+             "tls-ca-bundle.pem",
++            "certs/cacert.pem",
+         ];
+         if result.cert_file.is_none() {
+             result.cert_file = cert_filenames

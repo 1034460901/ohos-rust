@@ -1,6 +1,6 @@
 diff --git a/compiler/rustc_codegen_ssa/src/back/link.rs b/compiler/rustc_codegen_ssa/src/back/link.rs
---- a/compiler/rustc_codegen_ssa/src/back/link.rs
 +++ b/compiler/rustc_codegen_ssa/src/back/link.rs
++++ /home/zqz/ohos-rust/rustc-1.89.0-src/compiler/rustc_codegen_ssa/src/back/link.rs	2026-08-25 18:03:33.119605932 +0800
 @@ -6,6 +6,7 @@
  use std::io::{BufReader, BufWriter, Write};
  use std::ops::{ControlFlow, Deref};
@@ -9,7 +9,7 @@ diff --git a/compiler/rustc_codegen_ssa/src/back/link.rs b/compiler/rustc_codege
  use std::process::{Output, Stdio};
  use std::{env, fmt, fs, io, mem, str};
  
-@@ -1063,6 +1064,12 @@ fn link_natively(
+@@ -1064,6 +1065,12 @@
          ab.add_file(temp_filename);
          ab.build(out_filename);
      }
@@ -22,7 +22,7 @@ diff --git a/compiler/rustc_codegen_ssa/src/back/link.rs b/compiler/rustc_codege
  }
  
  fn strip_with_external_utility(sess: &Session, util: &str, out_filename: &Path, options: &[&str]) {
-@@ -3434,3 +3441,51 @@ fn warn_if_linked_with_gold(sess: &Session, path: &Path) -> Result<(), Box<dyn s
+@@ -3434,3 +3441,51 @@
      }
      Ok(())
  }
