@@ -11,7 +11,7 @@ on:
   release:
     types: [ published ]
   push:
-    branches: [ "main" ]
+    branches: [ "main", "1.89.0", "nightly" ]
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
@@ -67,13 +67,35 @@ jobs:
       - name: Determine Rust version and channel
         id: version
         run: |
-          CHANNEL="${{ github.event.inputs.channel || 'stable' }}"
-          SELECT="${{ github.event.inputs.rust_version_select || '1.95.0' }}"
-          CUSTOM="${{ github.event.inputs.rust_version_custom || '' }}"
+          # workflow_dispatch: use inputs
+          # push: derive from branch name
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            CHANNEL="${{ github.event.inputs.channel || 'stable' }}"
+            SELECT="${{ github.event.inputs.rust_version_select || '1.95.0' }}"
+            CUSTOM="${{ github.event.inputs.rust_version_custom || '' }}"
 
-          # Nightly channel defaults to 1.100.0 if version not explicitly set
-          if [ "$CHANNEL" = "nightly" ] && [ "$SELECT" = "1.95.0" ]; then
-            SELECT="1.100.0"
+            # Nightly channel defaults to 1.100.0 if version not explicitly set
+            if [ "$CHANNEL" = "nightly" ] && [ "$SELECT" = "1.95.0" ]; then
+              SELECT="1.100.0"
+            fi
+          else
+            # Push/PR: derive from branch name
+            BRANCH="${{ github.ref_name }}"
+            case "$BRANCH" in
+              1.89.0)
+                CHANNEL="stable"
+                SELECT="1.89.0"
+                ;;
+              nightly)
+                CHANNEL="nightly"
+                SELECT="1.100.0"
+                ;;
+              *)
+                CHANNEL="stable"
+                SELECT="1.95.0"
+                ;;
+            esac
+            CUSTOM=""
           fi
 
           case "$SELECT" in
