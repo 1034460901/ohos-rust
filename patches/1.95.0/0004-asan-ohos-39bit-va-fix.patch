@@ -28,10 +28,11 @@ Combined sanitizer fixes for OHOS aarch64 (39-bit VA):
 
 --- a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform.h
 +++ b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform.h
-@@ -135,6 +135,13 @@
+@@ -135,7 +135,14 @@
  #else
  #  define SANITIZER_ANDROID 0
  #endif
+ 
 +
 +#if defined(__OHOS__)
 +#  define SANITIZER_OHOS 1
@@ -109,20 +110,21 @@ Combined sanitizer fixes for OHOS aarch64 (39-bit VA):
      }
      if builder.config.llvm_clang_cl.is_some() {
          cxxflags.push(format!(" --target={target}"));
-@@ -871,8 +887,14 @@
+@@ -883,10 +899,13 @@
          }
      }
  
+-    if target.contains("ohos") {
+-        ldflags.push_all("-Wl,--code-sign");
+-    }
+-
 +    if target.contains("ohos") {
 +        ldflags.push_all(format!(" --target={target}"));
 +        ldflags.push_all(" --sysroot=/opt/ohos-sdk/native/sysroot");
 +        ldflags.push_all(" -fuse-ld=lld");
++        ldflags.push_all("-Wl,--code-sign");
 +    }
 +
-     if target.contains("ohos") {
-         ldflags.push_all("-Wl,--code-sign");
-     }
- 
      cfg.define("CMAKE_SHARED_LINKER_FLAGS", &ldflags.shared);
      cfg.define("CMAKE_MODULE_LINKER_FLAGS", &ldflags.module);
      cfg.define("CMAKE_EXE_LINKER_FLAGS", &ldflags.exe);
