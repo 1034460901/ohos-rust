@@ -293,6 +293,10 @@ if [ ! -d "$SRC_DIR" ]; then
         fi
     fi
     tar -zxf "rustc-$RUST_VERSION-src.tar.gz" -C "$WORKDIR"
+    # Nightly archive extracts as "rustc-nightly-src", rename to expected dir
+    if [ -d "$WORKDIR/rustc-nightly-src" ] && [ ! -d "$SRC_DIR" ]; then
+        mv "$WORKDIR/rustc-nightly-src" "$SRC_DIR"
+    fi
 else
     echo "=== 源码已存在，跳过下载: $SRC_DIR ==="
 fi
