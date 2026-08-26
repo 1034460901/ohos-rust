@@ -264,12 +264,18 @@ fi
 if [ ! -d "$SRC_DIR" ]; then
     echo "=== 下载 Rust 源码 ==="
     if [ ! -f "$WORKDIR/rustc-$RUST_VERSION-src.tar.gz" ]; then
-        OFFICIAL_URL="https://static.rust-lang.org/dist/rustc-$RUST_VERSION-src.tar.gz"
-        MIRROR_URL="https://mirrors.ustc.edu.cn/rust-static/dist/rustc-$RUST_VERSION-src.tar.gz"
-        if [ "$USE_MIRROR" = "true" ]; then
-            URLS="$MIRROR_URL $OFFICIAL_URL"
+        # Nightly channel: version tarball may not exist, try nightly archive too
+        if [ "$CHANNEL" = "nightly" ]; then
+            OFFICIAL_URLS="https://static.rust-lang.org/dist/rustc-$RUST_VERSION-src.tar.gz https://static.rust-lang.org/dist/rustc-nightly-src.tar.gz"
+            MIRROR_URLS="https://mirrors.ustc.edu.cn/rust-static/dist/rustc-$RUST_VERSION-src.tar.gz https://mirrors.ustc.edu.cn/rust-static/dist/rustc-nightly-src.tar.gz"
         else
-            URLS="$OFFICIAL_URL $MIRROR_URL"
+            OFFICIAL_URLS="https://static.rust-lang.org/dist/rustc-$RUST_VERSION-src.tar.gz"
+            MIRROR_URLS="https://mirrors.ustc.edu.cn/rust-static/dist/rustc-$RUST_VERSION-src.tar.gz"
+        fi
+        if [ "$USE_MIRROR" = "true" ]; then
+            URLS="$MIRROR_URLS $OFFICIAL_URLS"
+        else
+            URLS="$OFFICIAL_URLS $MIRROR_URLS"
         fi
         for url in $URLS; do
             echo "  尝试下载: $url"
@@ -277,6 +283,10 @@ if [ ! -d "$SRC_DIR" ]; then
                 break
             fi
         done
+        # Handle nightly archive filename (rustc-nightly-src.tar.gz)
+        if [ ! -f "$WORKDIR/rustc-$RUST_VERSION-src.tar.gz" ] && [ -f "$WORKDIR/rustc-nightly-src.tar.gz" ]; then
+            mv "$WORKDIR/rustc-nightly-src.tar.gz" "$WORKDIR/rustc-$RUST_VERSION-src.tar.gz"
+        fi
         if [ ! -f "$WORKDIR/rustc-$RUST_VERSION-src.tar.gz" ]; then
             echo "错误: 所有下载源均失败" >&2
             exit 1
