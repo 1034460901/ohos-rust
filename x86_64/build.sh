@@ -387,6 +387,16 @@ with open('$checksum_file', 'w') as f:
     fi
     echo "✓ 所有 patch 验证通过"
 
+    # Fix f128/f16: OHOS doesn't have reliable f128/f16 math
+    if [ "$RUST_VERSION" = "1.100.0" ]; then
+        for f128_file in library/std/src/num/f128.rs library/std/src/num/f16.rs; do
+            if [ -f "$SRC_DIR/$f128_file" ]; then
+                sed -i 's/#\[cfg(target_has_reliable_f128_math)\]/#[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))]/g' "$SRC_DIR/$f128_file"
+                sed -i 's/#\[cfg(target_has_reliable_f16_math)\]/#[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))]/g' "$SRC_DIR/$f128_file"
+                echo "  Fixed f128/f16 OHOS cfg: $f128_file"
+            fi
+        done
+    fi
     touch "$PATCH_MARKER"
     echo "=== Patches 应用完成 ==="
 else
