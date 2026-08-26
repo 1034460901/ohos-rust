@@ -1,6 +1,5 @@
-diff --git a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform.h b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform.h
+--- a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform.h
 +++ b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform.h
-+++ /home/zqz/ohos-rust/rustc-1.89.0-src/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform.h	2026-08-25 18:05:23.209820382 +0800
 @@ -123,6 +123,12 @@
  #  define SANITIZER_ANDROID 0
  #endif
@@ -14,9 +13,8 @@ diff --git a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platfor
  #if defined(__Fuchsia__)
  #  define SANITIZER_FUCHSIA 1
  #else
-diff --git a/src/llvm-project/compiler-rt/lib/asan/asan_allocator.h b/src/llvm-project/compiler-rt/lib/asan/asan_allocator.h
+--- a/src/llvm-project/compiler-rt/lib/asan/asan_allocator.h
 +++ b/src/llvm-project/compiler-rt/lib/asan/asan_allocator.h
-+++ /home/zqz/ohos-rust/rustc-1.89.0-src/src/llvm-project/compiler-rt/lib/asan/asan_allocator.h	2026-08-25 18:05:23.210266282 +0800
 @@ -199,7 +199,7 @@
  #    if defined(__powerpc64__)
  const uptr kAllocatorSize  =  0x20000000000ULL;  // 2T.
@@ -26,9 +24,8 @@ diff --git a/src/llvm-project/compiler-rt/lib/asan/asan_allocator.h b/src/llvm-p
  // Android needs to support 39, 42 and 48 bit VMA.
  const uptr kAllocatorSize  =  0x2000000000ULL;  // 128G.
  typedef VeryCompactSizeClassMap SizeClassMap;
-diff --git a/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h b/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h
+--- a/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h
 +++ b/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h
-+++ /home/zqz/ohos-rust/rustc-1.89.0-src/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h	2026-08-25 18:05:23.210365082 +0800
 @@ -74,7 +74,7 @@
  #if defined(HWASAN_ALIASING_MODE)
    static const uptr kSpaceSize = 1ULL << kAddressTagShift;
@@ -38,9 +35,8 @@ diff --git a/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h b/src/ll
    static const uptr kSpaceSize = 0x40000000000ULL;  // 4T.
    typedef __sanitizer::DefaultSizeClassMap SizeClassMap;
  #else
-diff --git a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.cpp b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.cpp
+--- a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.cpp
 +++ b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.cpp
-+++ /home/zqz/ohos-rust/rustc-1.89.0-src/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.cpp	2026-08-25 18:05:23.186334182 +0800
 @@ -19,6 +19,11 @@
  // To get this "true" dirent definition, we undefine _FILE_OFFSET_BITS below.
  #undef _FILE_OFFSET_BITS
@@ -53,9 +49,8 @@ diff --git a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platfor
  #endif
  
  // Must go after undef _FILE_OFFSET_BITS.
-diff --git a/src/bootstrap/src/core/build_steps/llvm.rs b/src/bootstrap/src/core/build_steps/llvm.rs
+--- a/src/bootstrap/src/core/build_steps/llvm.rs
 +++ b/src/bootstrap/src/core/build_steps/llvm.rs
-+++ /home/zqz/ohos-rust/rustc-1.89.0-src/src/bootstrap/src/core/build_steps/llvm.rs	2026-08-25 18:05:23.185532782 +0800
 @@ -736,6 +736,14 @@
          None => (builder.cc(target), builder.cxx(target).unwrap()),
      };
@@ -71,56 +66,3 @@ diff --git a/src/bootstrap/src/core/build_steps/llvm.rs b/src/bootstrap/src/core
      // If ccache is configured we inform the build a little differently how
      // to invoke ccache while also invoking our compilers.
      if use_compiler_launcher && let Some(ref ccache) = builder.config.ccache {
-@@ -769,7 +777,11 @@
-         cflags.push(s);
-     }
-     if target.contains("ohos") {
-+        cflags.push(format!(" --target={target}"));
-+        cflags.push(" --sysroot=/opt/ohos-sdk/native/sysroot");
-         cflags.push(" -D_LINUX_SYSINFO_H");
-+        cflags.push(" -D_UAPI_LINUX_SOCKET_H");
-+        cflags.push(" -fuse-ld=lld");
-     }
-     if builder.config.llvm_clang_cl.is_some() {
-         cflags.push(format!(" --target={target}"));
-@@ -792,7 +804,11 @@
-         cxxflags.push(s);
-     }
-     if target.contains("ohos") {
-+        cxxflags.push(format!(" --target={target}"));
-+        cxxflags.push(" --sysroot=/opt/ohos-sdk/native/sysroot");
-         cxxflags.push(" -D_LINUX_SYSINFO_H");
-+        cxxflags.push(" -D_UAPI_LINUX_SOCKET_H");
-+        cxxflags.push(" -fuse-ld=lld");
-     }
-     if builder.config.llvm_clang_cl.is_some() {
-         cxxflags.push(format!(" --target={target}"));
-@@ -836,10 +852,28 @@
-         }
-     }
- 
-+    if target.contains("ohos") {
-+        ldflags.push_all(format!(" --target={target}"));
-+        ldflags.push_all(" --sysroot=/opt/ohos-sdk/native/sysroot");
-+        ldflags.push_all(" -fuse-ld=lld");
-+    }
-+
-+    if target.contains("ohos") {
-+        ldflags.push_all("-Wl,--code-sign");
-+    }
-+
-     cfg.define("CMAKE_SHARED_LINKER_FLAGS", &ldflags.shared);
-     cfg.define("CMAKE_MODULE_LINKER_FLAGS", &ldflags.module);
-     cfg.define("CMAKE_EXE_LINKER_FLAGS", &ldflags.exe);
- 
-+    if target.contains("ohos") {
-+        // cmake --install rewrites RPATH (build -> install), invalidating the
-+        // .codesign hash from -Wl,--code-sign. Use install RPATH at build
-+        // time so no post-link modification occurs.
-+        cfg.define("CMAKE_BUILD_WITH_INSTALL_RPATH", "ON");
-+        cfg.define("CMAKE_INSTALL_RPATH", "$ORIGIN/../lib");
-+    }
-+
-     if env::var_os("SCCACHE_ERROR_LOG").is_some() {
-         cfg.env("RUSTC_LOG", "sccache=warn");
-     }
