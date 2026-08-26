@@ -264,10 +264,11 @@ fi
 if [ ! -d "$SRC_DIR" ]; then
     echo "=== 下载 Rust 源码 ==="
     if [ ! -f "$WORKDIR/rustc-$RUST_VERSION-src.tar.gz" ]; then
-        # Nightly channel: version tarball may not exist, try nightly archive too
+        # Nightly channel: use dated tarball (version tarball doesn't exist)
         if [ "$CHANNEL" = "nightly" ]; then
-            OFFICIAL_URLS="https://static.rust-lang.org/dist/rustc-$RUST_VERSION-src.tar.gz https://static.rust-lang.org/dist/rustc-nightly-src.tar.gz"
-            MIRROR_URLS="https://mirrors.ustc.edu.cn/rust-static/dist/rustc-$RUST_VERSION-src.tar.gz https://mirrors.ustc.edu.cn/rust-static/dist/rustc-nightly-src.tar.gz"
+            NIGHTLY_DATE="${NIGHTLY_DATE:-2026-08-20}"
+            OFFICIAL_URLS="https://static.rust-lang.org/dist/rustc-$RUST_VERSION-src.tar.gz https://static.rust-lang.org/dist/$NIGHTLY_DATE/rustc-nightly-src.tar.gz"
+            MIRROR_URLS="https://mirrors.ustc.edu.cn/rust-static/dist/rustc-$RUST_VERSION-src.tar.gz https://mirrors.ustc.edu.cn/rust-static/dist/$NIGHTLY_DATE/rustc-nightly-src.tar.gz"
         else
             OFFICIAL_URLS="https://static.rust-lang.org/dist/rustc-$RUST_VERSION-src.tar.gz"
             MIRROR_URLS="https://mirrors.ustc.edu.cn/rust-static/dist/rustc-$RUST_VERSION-src.tar.gz"
