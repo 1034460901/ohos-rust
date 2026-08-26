@@ -1,4 +1,4 @@
-﻿From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2000
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2000
 From: OHOS Rust <ohos-rust@example.com>
 Date: Thu, 13 Aug 2026 00:00:00 +0000
 Subject: [PATCH] OHOS sanitizer: ASAN/HWASAN 39-bit VA + clang/sysroot/sysinfo fixes
