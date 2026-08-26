@@ -1,7 +1,6 @@
 diff --git a/src/bootstrap/bootstrap.py b/src/bootstrap/bootstrap.py
+--- a/src/bootstrap/bootstrap.py
 +++ b/src/bootstrap/bootstrap.py
-+++ /home/zqz/ohos-rust/rustc-1.89.0-src/src/bootstrap/bootstrap.py	2026-08-25 18:03:33.125020932 +0800
-@@ -326,12 +326,14 @@
      # Consider the direct transformation first and then the special cases
      if kernel in kerneltype_mapper:
          kernel = kerneltype_mapper[kernel]
@@ -27,9 +26,8 @@ diff --git a/src/bootstrap/bootstrap.py b/src/bootstrap/bootstrap.py
  
              # If the user has explicitly indicated whether binaries should be
 diff --git a/src/bootstrap/src/bin/rustc.rs b/src/bootstrap/src/bin/rustc.rs
+--- a/src/bootstrap/src/bin/rustc.rs
 +++ b/src/bootstrap/src/bin/rustc.rs
-+++ /home/zqz/ohos-rust/rustc-1.89.0-src/src/bootstrap/src/bin/rustc.rs	2026-08-25 18:03:33.125351332 +0800
-@@ -16,6 +16,7 @@
  //! never get replaced.
  
  use std::env;
@@ -160,9 +158,8 @@ diff --git a/src/bootstrap/src/bin/rustc.rs b/src/bootstrap/src/bin/rustc.rs
          let rust_env_vars =
              env::vars().filter(|(k, _)| k.starts_with("RUST") || k.starts_with("CARGO"));
 diff --git a/src/bootstrap/src/core/build_steps/llvm.rs b/src/bootstrap/src/core/build_steps/llvm.rs
+--- a/src/bootstrap/src/core/build_steps/llvm.rs
 +++ b/src/bootstrap/src/core/build_steps/llvm.rs
-+++ /home/zqz/ohos-rust/rustc-1.89.0-src/src/bootstrap/src/core/build_steps/llvm.rs	2026-08-25 18:05:23.185532782 +0800
-@@ -736,6 +736,14 @@
          None => (builder.cc(target), builder.cxx(target).unwrap()),
      };
  
@@ -231,9 +228,8 @@ diff --git a/src/bootstrap/src/core/build_steps/llvm.rs b/src/bootstrap/src/core
          cfg.env("RUSTC_LOG", "sccache=warn");
      }
 diff --git a/src/bootstrap/src/core/build_steps/test.rs b/src/bootstrap/src/core/build_steps/test.rs
+--- a/src/bootstrap/src/core/build_steps/test.rs
 +++ b/src/bootstrap/src/core/build_steps/test.rs
-+++ /home/zqz/ohos-rust/rustc-1.89.0-src/src/bootstrap/src/core/build_steps/test.rs	2026-08-25 18:03:33.168468532 +0800
-@@ -2690,7 +2690,15 @@
              }
  
              // Build `cargo test` command
@@ -251,9 +247,8 @@ diff --git a/src/bootstrap/src/core/build_steps/test.rs b/src/bootstrap/src/core
  
          match mode {
 diff --git a/src/bootstrap/src/core/build_steps/dist.rs b/src/bootstrap/src/core/build_steps/dist.rs
+--- a/src/bootstrap/src/core/build_steps/dist.rs
 +++ b/src/bootstrap/src/core/build_steps/dist.rs
-+++ /home/zqz/ohos-rust/rustc-1.89.0-src/src/bootstrap/src/core/build_steps/dist.rs	2026-08-25 18:03:33.169444932 +0800
-@@ -1543,7 +1543,10 @@
          }
  
          add_component!("rust-docs" => Docs { host: target });
@@ -266,9 +261,8 @@ diff --git a/src/bootstrap/src/core/build_steps/dist.rs b/src/bootstrap/src/core
          add_component!("rustfmt" => Rustfmt { compiler, target });
          add_component!("rust-analyzer" => RustAnalyzer { compiler, target });
 diff --git a/src/bootstrap/src/core/build_steps/doc.rs b/src/bootstrap/src/core/build_steps/doc.rs
+--- a/src/bootstrap/src/core/build_steps/doc.rs
 +++ b/src/bootstrap/src/core/build_steps/doc.rs
-+++ /home/zqz/ohos-rust/rustc-1.89.0-src/src/bootstrap/src/core/build_steps/doc.rs	2026-08-25 18:03:33.169035732 +0800
-@@ -1081,6 +1081,10 @@
      }
  
      fn make_run(run: RunConfig<'_>) {
@@ -280,9 +274,8 @@ diff --git a/src/bootstrap/src/core/build_steps/doc.rs b/src/bootstrap/src/core/
          run.builder.ensure(ErrorIndex { target });
      }
 diff --git a/vendor/libffi-sys-3.3.1/libffi/config.sub b/vendor/libffi-sys-3.3.1/libffi/config.sub
+--- a/vendor/libffi-sys-3.3.1/libffi/config.sub
 +++ b/vendor/libffi-sys-3.3.1/libffi/config.sub
-+++ /home/zqz/ohos-rust/rustc-1.89.0-src/vendor/libffi-sys-3.3.1/libffi/config.sub	2026-08-25 18:03:33.169866632 +0800
-@@ -1768,7 +1768,7 @@
  	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
  	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi* \
  	     | nsk* | powerunix* | genode* | zvmoe* | qnx* | emx* | zephyr* \
