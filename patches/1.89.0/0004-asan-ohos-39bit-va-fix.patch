@@ -49,20 +49,3 @@
  #endif
  
  // Must go after undef _FILE_OFFSET_BITS.
---- a/src/bootstrap/src/core/build_steps/llvm.rs
-+++ b/src/bootstrap/src/core/build_steps/llvm.rs
-@@ -736,6 +736,14 @@
-         None => (builder.cc(target), builder.cxx(target).unwrap()),
-     };
- 
-+    // OHOS targets require LLD for --code-sign support; use the OHOS SDK clang
-+    let (cc, cxx) = if target.contains("ohos") {
-+        let sdk = std::path::Path::new("/opt/ohos-sdk/native/llvm/bin");
-+        (sdk.join("clang"), sdk.join("clang++"))
-+    } else {
-+        (cc, cxx)
-+    };
-+
-     // If ccache is configured we inform the build a little differently how
-     // to invoke ccache while also invoking our compilers.
-     if use_compiler_launcher && let Some(ref ccache) = builder.config.ccache {
