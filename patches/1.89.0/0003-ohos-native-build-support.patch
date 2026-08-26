@@ -1,6 +1,7 @@
 diff --git a/src/bootstrap/bootstrap.py b/src/bootstrap/bootstrap.py
 --- a/src/bootstrap/bootstrap.py
 +++ b/src/bootstrap/bootstrap.py
+@@ -326,12 +326,14 @@
      # Consider the direct transformation first and then the special cases
      if kernel in kerneltype_mapper:
          kernel = kerneltype_mapper[kernel]
@@ -28,6 +29,7 @@ diff --git a/src/bootstrap/bootstrap.py b/src/bootstrap/bootstrap.py
 diff --git a/src/bootstrap/src/bin/rustc.rs b/src/bootstrap/src/bin/rustc.rs
 --- a/src/bootstrap/src/bin/rustc.rs
 +++ b/src/bootstrap/src/bin/rustc.rs
+@@ -16,6 +16,7 @@
  //! never get replaced.
  
  use std::env;
@@ -160,6 +162,7 @@ diff --git a/src/bootstrap/src/bin/rustc.rs b/src/bootstrap/src/bin/rustc.rs
 diff --git a/src/bootstrap/src/core/build_steps/llvm.rs b/src/bootstrap/src/core/build_steps/llvm.rs
 --- a/src/bootstrap/src/core/build_steps/llvm.rs
 +++ b/src/bootstrap/src/core/build_steps/llvm.rs
+@@ -736,6 +736,14 @@
          None => (builder.cc(target), builder.cxx(target).unwrap()),
      };
  
@@ -230,6 +233,7 @@ diff --git a/src/bootstrap/src/core/build_steps/llvm.rs b/src/bootstrap/src/core
 diff --git a/src/bootstrap/src/core/build_steps/test.rs b/src/bootstrap/src/core/build_steps/test.rs
 --- a/src/bootstrap/src/core/build_steps/test.rs
 +++ b/src/bootstrap/src/core/build_steps/test.rs
+@@ -2690,7 +2690,15 @@
              }
  
              // Build `cargo test` command
@@ -249,6 +253,7 @@ diff --git a/src/bootstrap/src/core/build_steps/test.rs b/src/bootstrap/src/core
 diff --git a/src/bootstrap/src/core/build_steps/dist.rs b/src/bootstrap/src/core/build_steps/dist.rs
 --- a/src/bootstrap/src/core/build_steps/dist.rs
 +++ b/src/bootstrap/src/core/build_steps/dist.rs
+@@ -1543,7 +1543,10 @@
          }
  
          add_component!("rust-docs" => Docs { host: target });
@@ -263,6 +268,7 @@ diff --git a/src/bootstrap/src/core/build_steps/dist.rs b/src/bootstrap/src/core
 diff --git a/src/bootstrap/src/core/build_steps/doc.rs b/src/bootstrap/src/core/build_steps/doc.rs
 --- a/src/bootstrap/src/core/build_steps/doc.rs
 +++ b/src/bootstrap/src/core/build_steps/doc.rs
+@@ -1081,6 +1081,10 @@
      }
  
      fn make_run(run: RunConfig<'_>) {
@@ -276,6 +282,7 @@ diff --git a/src/bootstrap/src/core/build_steps/doc.rs b/src/bootstrap/src/core/
 diff --git a/vendor/libffi-sys-3.3.1/libffi/config.sub b/vendor/libffi-sys-3.3.1/libffi/config.sub
 --- a/vendor/libffi-sys-3.3.1/libffi/config.sub
 +++ b/vendor/libffi-sys-3.3.1/libffi/config.sub
+@@ -1768,7 +1768,7 @@
  	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
  	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi* \
  	     | nsk* | powerunix* | genode* | zvmoe* | qnx* | emx* | zephyr* \
