@@ -1,0 +1,22 @@
+diff --git a/vendor/openssl-probe-0.1.5/src/lib.rs b/vendor/openssl-probe-0.1.5/src/lib.rs
+--- a/vendor/openssl-probe-0.1.5/src/lib.rs
++++ b/vendor/openssl-probe-0.1.5/src/lib.rs
+@@ -115,6 +115,7 @@ pub fn probe() -> ProbeResult {
+             "certs/ca-bundle.crt",
+             "CARootCertificates.pem",
+             "tls-ca-bundle.pem",
++            "certs/cacert.pem",
+         ];
+         if result.cert_file.is_none() {
+             result.cert_file = cert_filenames
+diff --git a/vendor/openssl-probe-0.1.6/src/lib.rs b/vendor/openssl-probe-0.1.6/src/lib.rs
+--- a/vendor/openssl-probe-0.1.6/src/lib.rs
++++ b/vendor/openssl-probe-0.1.6/src/lib.rs
+@@ -180,6 +180,7 @@ pub fn probe() -> ProbeResult {
+             "certs/ca-bundle.crt",
+             "CARootCertificates.pem",
+             "tls-ca-bundle.pem",
++            "certs/cacert.pem",
+         ];
+         if result.cert_file.is_none() {
+             result.cert_file = cert_filenames

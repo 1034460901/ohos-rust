@@ -1,19 +1,29 @@
 name: CI
 
 run-name: "${{ github.event_name == 'workflow_dispatch' && format('Build Rust
-  {0} for OHOS', github.event.inputs.rust_version_select == 'custom' &&
+  {0} ({1}) for OHOS', github.event.inputs.rust_version_select == 'custom' &&
   github.event.inputs.rust_version_custom ||
-  github.event.inputs.rust_version_select || '1.95.0') || '' }}"
+  github.event.inputs.rust_version_select ||
+  (github.event.inputs.channel == 'nightly' && '1.100.0') || '1.95.0',
+  github.event.inputs.channel || 'stable') || '' }}"
 
 on:
   release:
     types: [ published ]
   push:
-    branches: [ "main", "nightly" ]
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
     inputs:
+      channel:
+        description: "Release channel"
+        required: false
+        default: "stable"
+        type: choice
+        options:
+          - "stable"
+          - "nightly"
       dry_run:
         description: "DRY_RUN mode (skip compilation, generate mock artifacts only)"
         required: false
@@ -25,17 +35,17 @@ on:
         default: true
         type: boolean
       rust_version_select:
-        description: "Rust version (select from list)"
+        description: "Rust version (nightly channel defaults to 1.100.0)"
         required: false
         default: "1.95.0"
         type: choice
         options:
           - "1.95.0"
+          - "1.100.0"
           - "1.89.0"
           - "custom"
       rust_version_custom:
-        description: "Custom Rust version (only used when \"custom\" is selected above,
-          e.g., 1.90.0)"
+        description: "Custom Rust version (only used when \"custom\" is selected above)"
         required: false
         default: ""
         type: string
@@ -54,11 +64,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Determine Rust version
+      - name: Determine Rust version and channel
         id: version
         run: |
+          CHANNEL="${{ github.event.inputs.channel || 'stable' }}"
           SELECT="${{ github.event.inputs.rust_version_select || '1.95.0' }}"
           CUSTOM="${{ github.event.inputs.rust_version_custom || '' }}"
+
+          # Nightly channel defaults to 1.100.0 if version not explicitly set
+          if [ "$CHANNEL" = "nightly" ] && [ "$SELECT" = "1.95.0" ]; then
+            SELECT="1.100.0"
+          fi
 
           case "$SELECT" in
             'custom')
@@ -72,12 +88,6 @@ jobs:
               RUST_VER="$SELECT"
               ;;
           esac
-
-          if [ "${{ github.ref_name }}" = "nightly" ]; then
-            CHANNEL="nightly"
-          else
-            CHANNEL="stable"
-          fi
 
           if [ "$CHANNEL" = "stable" ]; then
             RELEASE="$RUST_VER"

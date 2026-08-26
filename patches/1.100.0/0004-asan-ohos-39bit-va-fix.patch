@@ -1,21 +1,33 @@
-﻿From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2000
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2000
 From: OHOS Rust <ohos-rust@example.com>
 Date: Thu, 13 Aug 2026 00:00:00 +0000
-Subject: [PATCH] OHOS sanitizer: ASAN/HWASAN 39-bit VA + clang/sysroot/sysinfo fixes
+Subject: [PATCH] OHOS sanitizer: ASAN/HWASAN/LSAN 39-bit VA + TSAN personality + clang/sysroot fixes
 
 Combined sanitizer fixes for OHOS aarch64 (39-bit VA):
 
-1. ASAN/HWASAN allocator size (originally 0004):
+1. ASAN/HWASAN/LSAN allocator size:
    - Add SANITIZER_OHOS macro in sanitizer_platform.h
    - ASAN: use 128GB allocator (kAllocatorSize=0x2000000000) for OHOS
      (default 4TB exceeds OHOS 39-bit VA / 512GB user space)
    - HWASAN: skip 4TB allocator for OHOS, fall through to 128GB path
+   - LSAN: use 128GB allocator for OHOS (same as Android aarch64 path)
+     (default 4TB exceeds OHOS 39-bit VA / 512GB user space)
 
-2. Sanitizer CMake clang override (originally 0005):
-   - Use OHOS SDK clang/clang++ for sanitizer builds
-   - Add -fuse-ld=lld to cflags/cxxflags (required for --code-sign)
+2. TSAN __gcc_personality_v0 stub:
+   - OHOS SDK has no libgcc_eh.a or libunwind.a for sanitizer archives
+   - Add sanitizer_gcc_personality_v0.cpp to sanitizer_common sources
+   - Provides __gcc_personality_v0 stub (returns _URC_CONTINUE_UNWIND)
+   - Safe because sanitizers never throw C++ exceptions (call Die() instead)
+   - Compiled into ALL sanitizer archives via SANITIZER_SOURCES_NOTERMINATION
 
-3. Sanitizer sysinfo + socket + target/sysroot (originally 0006):
+3. Sanitizer CMake clang override:
+    - Use OHOS SDK clang/clang++ for sanitizer builds
+    - Add -fuse-ld=lld to cflags/cxxflags (required for --code-sign)
+    - Add -fno-emulated-tls to cflags/cxxflags (use native TLS, not emutls)
+    - Add -gz=none to cflags/cxxflags (prevent zlib-compressed debug sections
+      that OHOS ld.lld cannot handle: ELFCOMPRESS_ZLIB)
+
+4. Sanitizer sysinfo + socket + target/sysroot:
    - Add --target and --sysroot to cflags/cxxflags/ldflags
      (OHOS SDK clang defaults to host target without --target)
    - Add -D_UAPI_LINUX_SOCKET_H to prevent sockaddr_storage redefinition
@@ -68,6 +80,71 @@ Combined sanitizer fixes for OHOS aarch64 (39-bit VA):
    typedef __sanitizer::DefaultSizeClassMap SizeClassMap;
  #else
 
+--- a/src/llvm-project/compiler-rt/lib/lsan/lsan_allocator.h
++++ b/src/llvm-project/compiler-rt/lib/lsan/lsan_allocator.h
+@@ -93,7 +93,7 @@
+ const uptr kAllocatorSize  =  0x40000000000ULL;  // 4T.
+ using LSanSizeClassMap = DefaultSizeClassMap;
+ #  elif SANITIZER_APPLE
+ const uptr kAllocatorSpace = 0x600000000000ULL;
+ const uptr kAllocatorSize  = 0x40000000000ULL;  // 4T.
+ using LSanSizeClassMap = DefaultSizeClassMap;
+-#  elif SANITIZER_ANDROID && defined(__aarch64__)
++#  elif (SANITIZER_ANDROID || SANITIZER_OHOS) && defined(__aarch64__)
+ const uptr kAllocatorSpace = 0x3000000000ULL;
+ const uptr kAllocatorSize = 0x2000000000ULL;
+ using LSanSizeClassMap = VeryCompactSizeClassMap;
+
+--- /dev/null
++++ b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_gcc_personality_v0.cpp
+@@ -0,0 +1,38 @@
++//===-- sanitizer_gcc_personality_v0.cpp ----------------------------------===//
++//
++// OHOS: Provide __gcc_personality_v0 stub for sanitizer archives.
++// OHOS SDK has no libgcc_eh.a or libunwind.a; this stub satisfies linker
++// references from C++ EH tables without requiring unwind runtime.
++// Safe because sanitizers never actually throw C++ exceptions (they call
++// Die() instead). The personality function is never called at runtime.
++//
++//===----------------------------------------------------------------------===//
++
++#if defined(__OHOS__)
++
++#include <stdint.h>
++
++typedef enum {
++  _URC_NO_REASON = 0,
++  _URC_FOREIGN_EXCEPTION_CAUGHT = 1,
++  _URC_FATAL_PHASE2_ERROR = 2,
++  _URC_FATAL_PHASE1_ERROR = 3,
++  _URC_NORMAL_STOP = 4,
++  _URC_END_OF_STACK = 5,
++  _URC_HANDLER_FOUND = 6,
++  _URC_INSTALL_CONTEXT = 7,
++  _URC_CONTINUE_UNWIND = 8
++} _Unwind_Reason_Code;
++
++struct _Unwind_Exception;
++struct _Unwind_Context;
++
++extern "C" _Unwind_Reason_Code __gcc_personality_v0(int version, int actions,
++    uint64_t exception_class, struct _Unwind_Exception *ue_header,
++    struct _Unwind_Context *context) {
++  return _URC_CONTINUE_UNWIND;
++}
++
++#endif // __OHOS__
+
+--- a/src/llvm-project/compiler-rt/lib/sanitizer_common/CMakeLists.txt
++++ b/src/llvm-project/compiler-rt/lib/sanitizer_common/CMakeLists.txt
+@@ -45,6 +45,7 @@
+   sanitizer_win.cpp
+   sanitizer_win_interception.cpp
++  sanitizer_gcc_personality_v0.cpp
+   )
+ 
+ set(SANITIZER_SOURCES
+
 --- a/src/bootstrap/src/core/build_steps/llvm.rs
 +++ b/src/bootstrap/src/core/build_steps/llvm.rs
 @@ -762,6 +762,14 @@
@@ -94,6 +171,8 @@ Combined sanitizer fixes for OHOS aarch64 (39-bit VA):
          cflags.push(" -D_LINUX_SYSINFO_H");
 +        cflags.push(" -D_UAPI_LINUX_SOCKET_H");
 +        cflags.push(" -fuse-ld=lld");
++        cflags.push(" -fno-emulated-tls");
++        cflags.push(" -gz=none");
      }
      if builder.config.llvm_clang_cl.is_some() {
          cflags.push(format!(" --target={target}"));
@@ -103,13 +182,15 @@ Combined sanitizer fixes for OHOS aarch64 (39-bit VA):
      if target.contains("ohos") {
 +        cxxflags.push(format!(" --target={target}"));
 +        cxxflags.push(" --sysroot=/opt/ohos-sdk/native/sysroot");
-         cxxflags.push(" -D_LINUX_SYSINFO_H");
++        cxxflags.push(" -D_LINUX_SYSINFO_H");
 +        cxxflags.push(" -D_UAPI_LINUX_SOCKET_H");
 +        cxxflags.push(" -fuse-ld=lld");
++        cxxflags.push(" -fno-emulated-tls");
++        cxxflags.push(" -gz=none");
      }
      if builder.config.llvm_clang_cl.is_some() {
          cxxflags.push(format!(" --target={target}"));
-@@ -871,8 +887,14 @@
+@@ -871,6 +887,13 @@
          }
      }
  
@@ -117,12 +198,9 @@ Combined sanitizer fixes for OHOS aarch64 (39-bit VA):
 +        ldflags.push_all(format!(" --target={target}"));
 +        ldflags.push_all(" --sysroot=/opt/ohos-sdk/native/sysroot");
 +        ldflags.push_all(" -fuse-ld=lld");
++        ldflags.push_all("-Wl,--code-sign");
 +    }
 +
-     if target.contains("ohos") {
-         ldflags.push_all("-Wl,--code-sign");
-     }
- 
      cfg.define("CMAKE_SHARED_LINKER_FLAGS", &ldflags.shared);
      cfg.define("CMAKE_MODULE_LINKER_FLAGS", &ldflags.module);
      cfg.define("CMAKE_EXE_LINKER_FLAGS", &ldflags.exe);

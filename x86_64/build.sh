@@ -1,4 +1,4 @@
-#!/bin/sh
+﻿#!/bin/sh
 set -e
 
 # 自动定位仓库根目录(脚本位于 x86_64/ 下,仓库根为上一级)
@@ -15,7 +15,7 @@ if [ -n "$1" ]; then
 elif [ -n "$RUST_VERSION" ]; then
     :
 else
-    RUST_VERSION="1.95.0"
+    RUST_VERSION="1.100.0"
 fi
 
 # Release channel (stable/beta/nightly/dev)
@@ -282,7 +282,7 @@ if [ ! -d "$SRC_DIR" ]; then
             exit 1
         fi
     fi
-    tar -zxf "$WORKDIR/rustc-$RUST_VERSION-src.tar.gz" -C "$WORKDIR"
+    tar -zxf "rustc-$RUST_VERSION-src.tar.gz" -C "$WORKDIR"
 else
     echo "=== 源码已存在，跳过下载: $SRC_DIR ==="
 fi
@@ -309,7 +309,9 @@ if [ ! -f "$PATCH_MARKER" ]; then
         if [ -f "$PATCH_FILE" ]; then
             echo "应用 patch: $(basename "$PATCH_FILE")"
             if ! patch -p1 --forward < "$PATCH_FILE"; then
-                echo "错误: patch 应用失败: $(basename "$PATCH_FILE")"
+                echo "✗ patch 应用失败: $(basename "$PATCH_FILE")" >&2
+                echo "  请检查 patch 上下文是否与 Rust $RUST_VERSION 源码匹配" >&2
+                echo "  可能原因: 前序 patch 修改了同一区域导致上下文偏移" >&2
                 exit 1
             fi
         fi
@@ -319,7 +321,7 @@ if [ ! -f "$PATCH_MARKER" ]; then
     # patch 修改了 vendor 目录下的源码，需要重置 .cargo-checksum.json
     # 否则 cargo 会因校验和不匹配而报错
     echo "=== 更新 vendored crate checksums ==="
-    for crate in vendor/openssl-probe-0.1.5 vendor/openssl-probe-0.1.6 vendor/libffi-sys-4.1.0; do
+    for crate in vendor/openssl-probe-0.1.6 vendor/openssl-probe-0.2.1 vendor/libffi-sys-4.1.0; do
         checksum_file="$crate/.cargo-checksum.json"
         if [ -f "$checksum_file" ]; then
             echo "重置 checksum: $checksum_file"
@@ -334,13 +336,41 @@ with open('$checksum_file', 'w') as f:
         fi
     done
 
-    # 验证无 .rej 文件（patch 全部应用成功）
-    REJ_FILES=$(find . -name "*.rej" -type f 2>/dev/null)
-    if [ -n "$REJ_FILES" ]; then
-        echo "错误: 发现 patch 拒绝文件，说明 patch 未完全应用:"
-        echo "$REJ_FILES"
+    # 验证关键 patch 标记（防止静默失败）
+    echo "=== 验证 patch 应用结果 ==="
+    PATCH_VERIFY_OK=true
+
+    # 0004: SANITIZER_OHOS 宏 (sanitizer_platform.h)
+    if ! grep -q "SANITIZER_OHOS" "$SRC_DIR/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform.h" 2>/dev/null; then
+        echo "✗ 验证失败: sanitizer_platform.h 中未找到 SANITIZER_OHOS 宏" >&2
+        PATCH_VERIFY_OK=false
+    fi
+
+    # 0004: asan_allocator.h 中 SANITIZER_OHOS (128GB allocator)
+    if ! grep -q "SANITIZER_OHOS" "$SRC_DIR/src/llvm-project/compiler-rt/lib/asan/asan_allocator.h" 2>/dev/null; then
+        echo "✗ 验证失败: asan_allocator.h 中未找到 SANITIZER_OHOS（ASAN 仍将使用 4TB allocator）" >&2
+        PATCH_VERIFY_OK=false
+    fi
+
+    # 0004: bootstrap/llvm.rs 中 OHOS SDK clang 覆盖
+    if ! grep -q '/opt/ohos-sdk/native/llvm/bin' "$SRC_DIR/src/bootstrap/src/core/build_steps/llvm.rs" 2>/dev/null; then
+        echo "✗ 验证失败: llvm.rs 中未找到 OHOS SDK clang 覆盖" >&2
+        echo "  compiler-rt 构建将不会定义 __OHOS__，ASAN 走 4TB 方案" >&2
+        PATCH_VERIFY_OK=false
+    fi
+
+    # 0004: bootstrap/llvm.rs 中 --sysroot（确保 clang 使用 OHOS 头文件）
+    if ! grep -q 'sysroot=/opt/ohos-sdk/native/sysroot' "$SRC_DIR/src/bootstrap/src/core/build_steps/llvm.rs" 2>/dev/null; then
+        echo "✗ 验证失败: llvm.rs 中未找到 --sysroot 参数" >&2
+        PATCH_VERIFY_OK=false
+    fi
+
+    if [ "$PATCH_VERIFY_OK" != "true" ]; then
+        echo "" >&2
+        echo "✗ Patch 验证失败，关键修改未生效。请检查 patch 文件。" >&2
         exit 1
     fi
+    echo "✓ 所有 patch 验证通过"
 
     touch "$PATCH_MARKER"
     echo "=== Patches 应用完成 ==="

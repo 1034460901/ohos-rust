@@ -1,0 +1,25 @@
+diff --git a/compiler/rustc_target/src/spec/base/linux_ohos.rs b/compiler/rustc_target/src/spec/base/linux_ohos.rs
+--- a/compiler/rustc_target/src/spec/base/linux_ohos.rs
++++ b/compiler/rustc_target/src/spec/base/linux_ohos.rs
+@@ -1,11 +1,16 @@
+-use crate::spec::{Env, TargetOptions, TlsModel, base};
++use crate::spec::{Cc, Env, LinkerFlavor, Lld, TargetOptions, TlsModel, base};
+
+ pub(crate) fn opts() -> TargetOptions {
+-    TargetOptions {
++    let mut opts = TargetOptions {
+         env: Env::Ohos,
+         crt_static_default: false,
+-        tls_model: TlsModel::Emulated,
+-        has_thread_local: false,
++        tls_model: TlsModel::GeneralDynamic,
++        has_thread_local: true,
+         ..base::linux::opts()
+-    }
++    };
++    opts.add_pre_link_args(
++        LinkerFlavor::Gnu(Cc::Yes, Lld::No),
++        &["-Wl,--code-sign"],
++    );
++    opts
+ }
