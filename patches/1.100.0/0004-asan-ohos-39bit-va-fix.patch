@@ -1,50 +1,10 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2000
-From: OHOS Rust <ohos-rust@example.com>
-Date: Thu, 13 Aug 2026 00:00:00 +0000
-Subject: [PATCH] OHOS sanitizer: ASAN/HWASAN/LSAN 39-bit VA + TSAN personality + clang/sysroot fixes
-
-Combined sanitizer fixes for OHOS aarch64 (39-bit VA):
-
-1. ASAN/HWASAN/LSAN allocator size:
-   - Add SANITIZER_OHOS macro in sanitizer_platform.h
-   - ASAN: use 128GB allocator (kAllocatorSize=0x2000000000) for OHOS
-     (default 4TB exceeds OHOS 39-bit VA / 512GB user space)
-   - HWASAN: skip 4TB allocator for OHOS, fall through to 128GB path
-   - LSAN: use 128GB allocator for OHOS (same as Android aarch64 path)
-     (default 4TB exceeds OHOS 39-bit VA / 512GB user space)
-
-2. TSAN __gcc_personality_v0 stub:
-   - OHOS SDK has no libgcc_eh.a or libunwind.a for sanitizer archives
-   - Add sanitizer_gcc_personality_v0.cpp to sanitizer_common sources
-   - Provides __gcc_personality_v0 stub (returns _URC_CONTINUE_UNWIND)
-   - Safe because sanitizers never throw C++ exceptions (call Die() instead)
-   - Compiled into ALL sanitizer archives via SANITIZER_SOURCES_NOTERMINATION
-
-3. Sanitizer CMake clang override:
-    - Use OHOS SDK clang/clang++ for sanitizer builds
-    - Add -fuse-ld=lld to cflags/cxxflags (required for --code-sign)
-    - Add -fno-emulated-tls to cflags/cxxflags (use native TLS, not emutls)
-    - Add -gz=none to cflags/cxxflags (prevent zlib-compressed debug sections
-      that OHOS ld.lld cannot handle: ELFCOMPRESS_ZLIB)
-
-4. Sanitizer sysinfo + socket + target/sysroot:
-   - Add --target and --sysroot to cflags/cxxflags/ldflags
-     (OHOS SDK clang defaults to host target without --target)
-   - Add -D_UAPI_LINUX_SOCKET_H to prevent sockaddr_storage redefinition
-   - Add ldflags OHOS block (--target, --sysroot, -fuse-ld=lld, -Wl,--code-sign)
-   - Include <sys/sysinfo.h> at top of sanitizer_platform_limits_posix.cpp
-     (bionic guards struct sysinfo with #ifndef _LINUX_KERNEL_H; must
-     include before any header that defines _LINUX_KERNEL_H)
-
----
-
+diff --git a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform.h b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform.h
 --- a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform.h
 +++ b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform.h
-@@ -135,6 +135,13 @@
- #else
+@@ -143,6 +143,12 @@
  #  define SANITIZER_ANDROID 0
  #endif
-+
+ 
 +#if defined(__OHOS__)
 +#  define SANITIZER_OHOS 1
 +#else
@@ -54,10 +14,10 @@ Combined sanitizer fixes for OHOS aarch64 (39-bit VA):
  #if defined(__Fuchsia__)
  #  define SANITIZER_FUCHSIA 1
  #else
-
+diff --git a/src/llvm-project/compiler-rt/lib/asan/asan_allocator.h b/src/llvm-project/compiler-rt/lib/asan/asan_allocator.h
 --- a/src/llvm-project/compiler-rt/lib/asan/asan_allocator.h
 +++ b/src/llvm-project/compiler-rt/lib/asan/asan_allocator.h
-@@ -205,7 +205,8 @@
+@@ -206,7 +206,8 @@
  #      endif
  typedef DefaultSizeClassMap SizeClassMap;
  #    elif defined(__aarch64__) && \
@@ -65,9 +25,9 @@ Combined sanitizer fixes for OHOS aarch64 (39-bit VA):
 +        (SANITIZER_ANDROID || defined(SANITIZER_AARCH64_39BIT_VA) || \
 +         SANITIZER_OHOS)
  // Android needs to support 39, 42 and 48 bit VMA.
- const uptr kAllocatorSize  =  0x2000000000ULL;  // 128G.
+ const uptr kAllocatorSize = 0x2000000000ULL;  // 128G.
  typedef VeryCompactSizeClassMap SizeClassMap;
-
+diff --git a/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h b/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h
 --- a/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h
 +++ b/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h
 @@ -75,7 +75,7 @@
@@ -79,13 +39,10 @@ Combined sanitizer fixes for OHOS aarch64 (39-bit VA):
    static const uptr kSpaceSize = 0x40000000000ULL;  // 4T.
    typedef __sanitizer::DefaultSizeClassMap SizeClassMap;
  #else
-
+diff --git a/src/llvm-project/compiler-rt/lib/lsan/lsan_allocator.h b/src/llvm-project/compiler-rt/lib/lsan/lsan_allocator.h
 --- a/src/llvm-project/compiler-rt/lib/lsan/lsan_allocator.h
 +++ b/src/llvm-project/compiler-rt/lib/lsan/lsan_allocator.h
 @@ -93,7 +93,7 @@
- const uptr kAllocatorSize  =  0x40000000000ULL;  // 4T.
- using LSanSizeClassMap = DefaultSizeClassMap;
- #  elif SANITIZER_APPLE
  const uptr kAllocatorSpace = 0x600000000000ULL;
  const uptr kAllocatorSize  = 0x40000000000ULL;  // 4T.
  using LSanSizeClassMap = DefaultSizeClassMap;
@@ -94,10 +51,10 @@ Combined sanitizer fixes for OHOS aarch64 (39-bit VA):
  const uptr kAllocatorSpace = 0x3000000000ULL;
  const uptr kAllocatorSize = 0x2000000000ULL;
  using LSanSizeClassMap = VeryCompactSizeClassMap;
-
+diff --git a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_gcc_personality_v0.cpp b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_gcc_personality_v0.cpp
+new file mode 100644
 --- /dev/null
 +++ b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_gcc_personality_v0.cpp
-@@ -0,0 +1,38 @@
 +//===-- sanitizer_gcc_personality_v0.cpp ----------------------------------===//
 +//
 +// OHOS: Provide __gcc_personality_v0 stub for sanitizer archives.
@@ -134,20 +91,21 @@ Combined sanitizer fixes for OHOS aarch64 (39-bit VA):
 +}
 +
 +#endif // __OHOS__
-
+diff --git a/src/llvm-project/compiler-rt/lib/sanitizer_common/CMakeLists.txt b/src/llvm-project/compiler-rt/lib/sanitizer_common/CMakeLists.txt
 --- a/src/llvm-project/compiler-rt/lib/sanitizer_common/CMakeLists.txt
 +++ b/src/llvm-project/compiler-rt/lib/sanitizer_common/CMakeLists.txt
 @@ -45,6 +45,7 @@
+   sanitizer_type_traits.cpp
    sanitizer_win.cpp
    sanitizer_win_interception.cpp
 +  sanitizer_gcc_personality_v0.cpp
    )
  
  set(SANITIZER_SOURCES
-
+diff --git a/src/bootstrap/src/core/build_steps/llvm.rs b/src/bootstrap/src/core/build_steps/llvm.rs
 --- a/src/bootstrap/src/core/build_steps/llvm.rs
 +++ b/src/bootstrap/src/core/build_steps/llvm.rs
-@@ -762,6 +762,14 @@
+@@ -917,6 +917,14 @@
          None => (builder.cc(target), builder.cxx(target).unwrap()),
      };
  
@@ -162,7 +120,7 @@ Combined sanitizer fixes for OHOS aarch64 (39-bit VA):
      // If ccache is configured we inform the build a little differently how
      // to invoke ccache while also invoking our compilers.
      if use_compiler_launcher && let Some(ref ccache) = builder.config.ccache {
-@@ -801,7 +809,11 @@
+@@ -956,7 +964,13 @@
          cflags.push(s);
      }
      if target.contains("ohos") {
@@ -176,13 +134,13 @@ Combined sanitizer fixes for OHOS aarch64 (39-bit VA):
      }
      if builder.config.llvm_clang_cl.is_some() {
          cflags.push(format!(" --target={target}"));
-@@ -826,7 +838,11 @@
+@@ -981,7 +995,13 @@
          cxxflags.push(s);
      }
      if target.contains("ohos") {
 +        cxxflags.push(format!(" --target={target}"));
 +        cxxflags.push(" --sysroot=/opt/ohos-sdk/native/sysroot");
-+        cxxflags.push(" -D_LINUX_SYSINFO_H");
+         cxxflags.push(" -D_LINUX_SYSINFO_H");
 +        cxxflags.push(" -D_UAPI_LINUX_SOCKET_H");
 +        cxxflags.push(" -fuse-ld=lld");
 +        cxxflags.push(" -fno-emulated-tls");
@@ -190,32 +148,13 @@ Combined sanitizer fixes for OHOS aarch64 (39-bit VA):
      }
      if builder.config.llvm_clang_cl.is_some() {
          cxxflags.push(format!(" --target={target}"));
-@@ -871,6 +887,13 @@
-         }
+@@ -1027,6 +1047,9 @@
      }
  
-+    if target.contains("ohos") {
+     if target.contains("ohos") {
 +        ldflags.push_all(format!(" --target={target}"));
 +        ldflags.push_all(" --sysroot=/opt/ohos-sdk/native/sysroot");
 +        ldflags.push_all(" -fuse-ld=lld");
-+        ldflags.push_all("-Wl,--code-sign");
-+    }
-+
-     cfg.define("CMAKE_SHARED_LINKER_FLAGS", &ldflags.shared);
-     cfg.define("CMAKE_MODULE_LINKER_FLAGS", &ldflags.module);
-     cfg.define("CMAKE_EXE_LINKER_FLAGS", &ldflags.exe);
-
---- a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.cpp
-+++ b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.cpp
-@@ -19,6 +19,11 @@
- // To get this "true" dirent definition, we undefine _FILE_OFFSET_BITS below.
- #undef _FILE_OFFSET_BITS
- #undef _TIME_BITS
-+// OHOS: include sys/sysinfo.h before any header that defines _LINUX_KERNEL_H,
-+// otherwise bionic's sys/sysinfo.h skips struct sysinfo definition.
-+#if defined(__OHOS__)
-+#include <sys/sysinfo.h>
-+#endif
- #endif
+         ldflags.push_all("-Wl,--code-sign");
+     }
  
- // Must go after undef _FILE_OFFSET_BITS.
