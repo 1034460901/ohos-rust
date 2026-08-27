@@ -1,1 +1,609 @@
-ZGlmZiAtLWdpdCBhL2xpYnJhcnkvc3RkL3NyYy9udW0vZjEyOC5ycyBiL2xpYnJhcnkvc3RkL3NyYy9udW0vZjEyOC5ycwotLS0gYS9saWJyYXJ5L3N0ZC9zcmMvbnVtL2YxMjgucnMKKysrIGIvbGlicmFyeS9zdGQvc3JjL251bS9mMTI4LnJzCkBAIC0zNCw3ICszNCw3IEBACiAgICAgLy8vCiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxMjgpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gbGV0IHggPSAyLjBfZjEyODsKICAgICAvLy8gbGV0IGFic19kaWZmZXJlbmNlID0gKHgucG93ZigyLjApIC0gKHggKiB4KSkuYWJzKCk7CkBAIC02NCw3ICs2NCw3IEBACiAgICAgLy8vCiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxMjgpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gbGV0IG9uZSA9IDEuMGYxMjg7CiAgICAgLy8vIC8vIGVeMQpAQCAtOTUsNyArOTUsNyBAQAogICAgIC8vLwogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCBmID0gMi4wZjEyODsKICAgICAvLy8KQEAgLTEyNiw3ICsxMjYsNyBAQAogICAgIC8vLwogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCBvbmUgPSAxLjBmMTI4OwogICAgIC8vLyAvLyBlXjEKQEAgLTE0Miw3ICsxNDIsNyBAQAogICAgIC8vLyBOb24tcG9zaXRpdmUgdmFsdWVzOgogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGFzc2VydF9lcSEoMF9mMTI4LmxuKCksIGYxMjg6Ok5FR19JTkZJTklUWSk7CiAgICAgLy8vIGFzc2VydCEoKC00Ml9mMTI4KS5sbigpLmlzX25hbigpKTsKQEAgLTE3Myw3ICsxNzMsNyBAQAogICAgIC8vLwogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCBmaXZlID0gNS4wZjEyODsKICAgICAvLy8KQEAgLTE4Nyw3ICsxODcsNyBAQAogICAgIC8vLyBOb24tcG9zaXRpdmUgdmFsdWVzOgogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGFzc2VydF9lcSEoMF9mMTI4LmxvZygxMC4wKSwgZjEyODo6TkVHX0lORklOSVRZKTsKICAgICAvLy8gYXNzZXJ0ISgoLTQyX2YxMjgpLmxvZygxMC4wKS5pc19uYW4oKSk7CkBAIC0yMTQsNyArMjE0LDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgdHdvID0gMi4wZjEyODsKICAgICAvLy8KQEAgLTIyOCw3ICsyMjgsNyBAQAogICAgIC8vLyBOb24tcG9zaXRpdmUgdmFsdWVzOgogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGFzc2VydF9lcSEoMF9mMTI4LmxvZzIoKSwgZjEyODo6TkVHX0lORklOSVRZKTsKICAgICAvLy8gYXNzZXJ0ISgoLTQyX2YxMjgpLmxvZzIoKS5pc19uYW4oKSk7CkBAIC0yNTUsNyArMjU1LDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgdGVuID0gMTAuMGYxMjg7CiAgICAgLy8vCkBAIC0yNjksNyArMjY5LDcgQEAKICAgICAvLy8gTm9uLXBvc2l0aXZlIHZhbHVlczoKICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBhc3NlcnRfZXEhKDBfZjEyOC5sb2cxMCgpLCBmMTI4OjpORUdfSU5GSU5JVFkpOwogICAgIC8vLyBhc3NlcnQhKCgtNDJfZjEyOCkubG9nMTAoKS5pc19uYW4oKSk7CkBAIC0yOTgsNyArMjk4LDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgeCA9IDguMGYxMjg7CiAgICAgLy8vCkBAIC0zMzQsNyArMzM0LDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgeCA9IDIuMGYxMjg7CiAgICAgLy8vIGxldCB5ID0gMy4wZjEyODsKQEAgLTM2NCw3ICszNjQsNyBAQAogICAgIC8vLwogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCB4ID0gc3RkOjpmMTI4Ojpjb25zdHM6OkZSQUNfUElfMjsKICAgICAvLy8KQEAgLTM5Miw3ICszOTIsNyBAQAogICAgIC8vLwogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCB4ID0gMi4wICogc3RkOjpmMTI4Ojpjb25zdHM6OlBJOwogICAgIC8vLwpAQCAtNDIzLDcgKzQyMyw3IEBACiAgICAgLy8vCiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxMjgpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gbGV0IHggPSBzdGQ6OmYxMjg6OmNvbnN0czo6RlJBQ19QSV80OwogICAgIC8vLyBsZXQgYWJzX2RpZmZlcmVuY2UgPSAoeC50YW4oKSAtIDEuMCkuYWJzKCk7CkBAIC00NTUsNyArNDU1LDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgZiA9IHN0ZDo6ZjEyODo6Y29uc3RzOjpGUkFDX1BJXzQ7CiAgICAgLy8vCkBAIC00OTAsNyArNDkwLDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgZiA9IHN0ZDo6ZjEyODo6Y29uc3RzOjpGUkFDX1BJXzQ7CiAgICAgLy8vCkBAIC01MjQsNyArNTI0LDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgZiA9IDEuMGYxMjg7CiAgICAgLy8vCkBAIC01NjQsNyArNTY0LDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyAvLyBQb3NpdGl2ZSBhbmdsZXMgbWVhc3VyZWQgY291bnRlci1jbG9ja3dpc2UKICAgICAvLy8gLy8gZnJvbSBwb3NpdGl2ZSB4IGF4aXMKQEAgLTYwNiw3ICs2MDYsNyBAQAogICAgIC8vLwogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCB4ID0gc3RkOjpmMTI4Ojpjb25zdHM6OkZSQUNfUElfNDsKICAgICAvLy8gbGV0IGYgPSB4LnNpbl9jb3MoKTsKQEAgLTY0Miw3ICs2NDIsNyBAQAogICAgIC8vLwogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCB4ID0gMWUtOF9mMTI4OwogICAgIC8vLwpAQCAtNjc4LDcgKzY3OCw3IEBACiAgICAgLy8vCiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxMjgpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gbGV0IHggPSAxZS04X2YxMjg7CiAgICAgLy8vCkBAIC02OTMsNyArNjkzLDcgQEAKICAgICAvLy8gT3V0LW9mLXJhbmdlIHZhbHVlczoKICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBhc3NlcnRfZXEhKCgtMS4wX2YxMjgpLmxuXzFwKCksIGYxMjg6Ok5FR19JTkZJTklUWSk7CiAgICAgLy8vIGFzc2VydCEoKC0yLjBfZjEyOCkubG5fMXAoKS5pc19uYW4oKSk7CkBAIC03MjIsNyArNzIyLDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgZSA9IHN0ZDo6ZjEyODo6Y29uc3RzOjpFOwogICAgIC8vLyBsZXQgeCA9IDEuMGYxMjg7CkBAIC03NTcsNyArNzU3LDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgZSA9IHN0ZDo6ZjEyODo6Y29uc3RzOjpFOwogICAgIC8vLyBsZXQgeCA9IDEuMGYxMjg7CkBAIC03OTIsNyArNzkyLDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgZSA9IHN0ZDo6ZjEyODo6Y29uc3RzOjpFOwogICAgIC8vLyBsZXQgeCA9IDEuMGYxMjg7CkBAIC04MjQsNyArODI0LDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgeCA9IDEuMGYxMjg7CiAgICAgLy8vIGxldCBmID0geC5zaW5oKCkuYXNpbmgoKTsKQEAgLTg1NCw3ICs4NTQsNyBAQAogICAgIC8vLwogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCB4ID0gMS4wZjEyODsKICAgICAvLy8gbGV0IGYgPSB4LmNvc2goKS5hY29zaCgpOwpAQCAtODg0LDcgKzg4NCw3IEBACiAgICAgLy8vCiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxMjgpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gbGV0IHggPSBzdGQ6OmYxMjg6OmNvbnN0czo6RlJBQ19QSV82OwogICAgIC8vLyBsZXQgZiA9IHgudGFuaCgpLmF0YW5oKCk7CkBAIC05MTgsNyArOTE4LDcgQEAKICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCiAgICAgLy8vICMhW2ZlYXR1cmUoZmxvYXRfZ2FtbWEpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gbGV0IHggPSA1LjBmMTI4OwogICAgIC8vLwpAQCAtOTUzLDcgKzk1Myw3IEBACiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxMjgpXQogICAgIC8vLyAjIVtmZWF0dXJlKGZsb2F0X2dhbW1hKV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCB4ID0gMi4wZjEyODsKICAgICAvLy8KQEAgLTk4OCw3ICs5ODgsNyBAQAogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KICAgICAvLy8gIyFbZmVhdHVyZShmbG9hdF9lcmYpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8gLy8vIFRoZSBlcnJvciBmdW5jdGlvbiByZWxhdGVzIHdoYXQgcGVyY2VudCBvZiBhIG5vcm1hbCBkaXN0cmlidXRpb24gbGllcwogICAgIC8vLyAvLy8gd2l0aGluIGB4YCBzdGFuZGFyZCBkZXZpYXRpb25zIChzY2FsZWQgYnkgYDEvc3FydCgyKWApLgogICAgIC8vLyBmbiB3aXRoaW5fc3RhbmRhcmRfZGV2aWF0aW9ucyh4OiBmMTI4KSAtPiBmMTI4IHsKQEAgLTEwMjcsNyArMTAyNyw3IEBACiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxMjgpXQogICAgIC8vLyAjIVtmZWF0dXJlKGZsb2F0X2VyZildCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLyBsZXQgeDogZjEyOCA9IDAuMTIzOwogICAgIC8vLwogICAgIC8vLyBsZXQgb25lID0geC5lcmYoKSArIHguZXJmYygpOwpkaWZmIC0tZ2l0IGEvbGlicmFyeS9zdGQvc3JjL251bS9mMTYucnMgYi9saWJyYXJ5L3N0ZC9zcmMvbnVtL2YxNi5ycwotLS0gYS9saWJyYXJ5L3N0ZC9zcmMvbnVtL2YxNi5ycworKysgYi9saWJyYXJ5L3N0ZC9zcmMvbnVtL2YxNi5ycwpAQCAtMzQsNyArMzQsNyBAQAogICAgIC8vLwogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTYpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCB4ID0gMi4wX2YxNjsKICAgICAvLy8gbGV0IGFic19kaWZmZXJlbmNlID0gKHgucG93ZigyLjApIC0gKHggKiB4KSkuYWJzKCk7CkBAIC02NCw3ICs2NCw3IEBACiAgICAgLy8vCiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxNildCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gbGV0IG9uZSA9IDEuMGYxNjsKICAgICAvLy8gLy8gZV4xCkBAIC05NSw3ICs5NSw3IEBACiAgICAgLy8vCiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxNildCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gbGV0IGYgPSAyLjBmMTY7CiAgICAgLy8vCkBAIC0xMjYsNyArMTI2LDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjE2KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgb25lID0gMS4wZjE2OwogICAgIC8vLyAvLyBlXjEKQEAgLTE0Miw3ICsxNDIsNyBAQAogICAgIC8vLyBOb24tcG9zaXRpdmUgdmFsdWVzOgogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTYpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGFzc2VydF9lcSEoMF9mMTYubG4oKSwgZjE2OjpORUdfSU5GSU5JVFkpOwogICAgIC8vLyBhc3NlcnQhKCgtNDJfZjE2KS5sbigpLmlzX25hbigpKTsKQEAgLTE3Myw3ICsxNzMsNyBAQAogICAgIC8vLwogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTYpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCBmaXZlID0gNS4wZjE2OwogICAgIC8vLwpAQCAtMTg3LDcgKzE4Nyw3IEBACiAgICAgLy8vIE5vbi1wb3NpdGl2ZSB2YWx1ZXM6CiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxNildCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gYXNzZXJ0X2VxISgwX2YxNi5sb2coMTAuMCksIGYxNjo6TkVHX0lORklOSVRZKTsKICAgICAvLy8gYXNzZXJ0ISgoLTQyX2YxNikubG9nKDEwLjApLmlzX25hbigpKTsKQEAgLTIxNCw3ICsyMTQsNyBAQAogICAgIC8vLwogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTYpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCB0d28gPSAyLjBmMTY7CiAgICAgLy8vCkBAIC0yMjgsNyArMjI4LDcgQEAKICAgICAvLy8gTm9uLXBvc2l0aXZlIHZhbHVlczoKICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjE2KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBhc3NlcnRfZXEhKDBfZjE2LmxvZzIoKSwgZjE2OjpORUdfSU5GSU5JVFkpOwogICAgIC8vLyBhc3NlcnQhKCgtNDJfZjE2KS5sb2cyKCkuaXNfbmFuKCkpOwpAQCAtMjU1LDcgKzI1NSw3IEBACiAgICAgLy8vCiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxNildCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gbGV0IHRlbiA9IDEwLjBmMTY7CiAgICAgLy8vCkBAIC0yNjksNyArMjY5LDcgQEAKICAgICAvLy8gTm9uLXBvc2l0aXZlIHZhbHVlczoKICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjE2KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBhc3NlcnRfZXEhKDBfZjE2LmxvZzEwKCksIGYxNjo6TkVHX0lORklOSVRZKTsKICAgICAvLy8gYXNzZXJ0ISgoLTQyX2YxNikubG9nMTAoKS5pc19uYW4oKSk7CkBAIC0zMDAsNyArMzAwLDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjE2KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgeCA9IDIuMGYxNjsKICAgICAvLy8gbGV0IHkgPSAzLjBmMTY7CkBAIC0zMzAsNyArMzMwLDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjE2KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgeCA9IHN0ZDo6ZjE2Ojpjb25zdHM6OkZSQUNfUElfMjsKICAgICAvLy8KQEAgLTM1OCw3ICszNTgsNyBAQAogICAgIC8vLwogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTYpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCB4ID0gMi4wICogc3RkOjpmMTY6OmNvbnN0czo6UEk7CiAgICAgLy8vCkBAIC0zODksNyArMzg5LDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjE2KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgeCA9IHN0ZDo6ZjE2Ojpjb25zdHM6OkZSQUNfUElfNDsKICAgICAvLy8gbGV0IGFic19kaWZmZXJlbmNlID0gKHgudGFuKCkgLSAxLjApLmFicygpOwpAQCAtNDIxLDcgKzQyMSw3IEBACiAgICAgLy8vCiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxNildCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gbGV0IGYgPSBzdGQ6OmYxNjo6Y29uc3RzOjpGUkFDX1BJXzQ7CiAgICAgLy8vCkBAIC00NTYsNyArNDU2LDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjE2KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgZiA9IHN0ZDo6ZjE2Ojpjb25zdHM6OkZSQUNfUElfNDsKICAgICAvLy8KQEAgLTQ5MCw3ICs0OTAsNyBAQAogICAgIC8vLwogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTYpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCBmID0gMS4wZjE2OwogICAgIC8vLwpAQCAtNTMwLDcgKzUzMCw3IEBACiAgICAgLy8vCiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxNildCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gLy8gUG9zaXRpdmUgYW5nbGVzIG1lYXN1cmVkIGNvdW50ZXItY2xvY2t3aXNlCiAgICAgLy8vIC8vIGZyb20gcG9zaXRpdmUgeCBheGlzCkBAIC01NzIsNyArNTcyLDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjE2KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgeCA9IHN0ZDo6ZjE2Ojpjb25zdHM6OkZSQUNfUElfNDsKICAgICAvLy8gbGV0IGYgPSB4LnNpbl9jb3MoKTsKQEAgLTYwOCw3ICs2MDgsNyBAQAogICAgIC8vLwogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTYpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCB4ID0gMWUtNF9mMTY7CiAgICAgLy8vCkBAIC02NDQsNyArNjQ0LDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjE2KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgeCA9IDFlLTRfZjE2OwogICAgIC8vLwpAQCAtNjU5LDcgKzY1OSw3IEBACiAgICAgLy8vIE91dC1vZi1yYW5nZSB2YWx1ZXM6CiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxNildCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gYXNzZXJ0X2VxISgoLTEuMF9mMTYpLmxuXzFwKCksIGYxNjo6TkVHX0lORklOSVRZKTsKICAgICAvLy8gYXNzZXJ0ISgoLTIuMF9mMTYpLmxuXzFwKCkuaXNfbmFuKCkpOwpAQCAtNjg4LDcgKzY4OCw3IEBACiAgICAgLy8vCiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxNildCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gbGV0IGUgPSBzdGQ6OmYxNjo6Y29uc3RzOjpFOwogICAgIC8vLyBsZXQgeCA9IDEuMGYxNjsKQEAgLTcyMyw3ICs3MjMsNyBAQAogICAgIC8vLwogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTYpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCBlID0gc3RkOjpmMTY6OmNvbnN0czo6RTsKICAgICAvLy8gbGV0IHggPSAxLjBmMTY7CkBAIC03NTgsNyArNzU4LDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjE2KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgZSA9IHN0ZDo6ZjE2Ojpjb25zdHM6OkU7CiAgICAgLy8vIGxldCB4ID0gMS4wZjE2OwpAQCAtNzkwLDcgKzc5MCw3IEBACiAgICAgLy8vCiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxNildCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gbGV0IHggPSAxLjBmMTY7CiAgICAgLy8vIGxldCBmID0geC5zaW5oKCkuYXNpbmgoKTsKQEAgLTgyMCw3ICs4MjAsNyBAQAogICAgIC8vLwogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTYpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCB4ID0gMS4wZjE2OwogICAgIC8vLyBsZXQgZiA9IHguY29zaCgpLmFjb3NoKCk7CkBAIC04NTAsNyArODUwLDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjE2KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgeCA9IHN0ZDo6ZjE2Ojpjb25zdHM6OkZSQUNfUElfNjsKICAgICAvLy8gbGV0IGYgPSB4LnRhbmgoKS5hdGFuaCgpOwpAQCAtODgzLDcgKzg4Myw3IEBACiAgICAgLy8vCiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxNildCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gbGV0IHggPSA1LjBmMTY7CiAgICAgLy8vCkBAIC05MTcsNyArOTE3LDcgQEAKICAgICAvLy8KICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjE2KV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxNl9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgeCA9IDIuMGYxNjsKICAgICAvLy8KQEAgLTk1MSw3ICs5NTEsNyBAQAogICAgIC8vLwogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTYpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjE2X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vIC8vLyBUaGUgZXJyb3IgZnVuY3Rpb24gcmVsYXRlcyB3aGF0IHBlcmNlbnQgb2YgYSBub3JtYWwgZGlzdHJpYnV0aW9uIGxpZXMKICAgICAvLy8gLy8vIHdpdGhpbiBgeGAgc3RhbmRhcmQgZGV2aWF0aW9ucyAoc2NhbGVkIGJ5IGAxL3NxcnQoMilgKS4KICAgICAvLy8gZm4gd2l0aGluX3N0YW5kYXJkX2RldmlhdGlvbnMoeDogZjE2KSAtPiBmMTYgewpAQCAtOTg5LDcgKzk4OSw3IEBACiAgICAgLy8vCiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxNildCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTZfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8gbGV0IHg6IGYxNiA9IDAuMTIzOwogICAgIC8vLwogICAgIC8vLyBsZXQgb25lID0geC5lcmYoKSArIHguZXJmYygpOwo=
+diff --git a/library/std/src/num/f128.rs b/library/std/src/num/f128.rs
+--- a/library/std/src/num/f128.rs
++++ b/library/std/src/num/f128.rs
+@@ -34,7 +34,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 2.0_f128;
+     /// let abs_difference = (x.powf(2.0) - (x * x)).abs();
+@@ -64,7 +64,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let one = 1.0f128;
+     /// // e^1
+@@ -95,7 +95,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let f = 2.0f128;
+     ///
+@@ -126,7 +126,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let one = 1.0f128;
+     /// // e^1
+@@ -142,7 +142,7 @@
+     /// Non-positive values:
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// assert_eq!(0_f128.ln(), f128::NEG_INFINITY);
+     /// assert!((-42_f128).ln().is_nan());
+@@ -173,7 +173,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let five = 5.0f128;
+     ///
+@@ -187,7 +187,7 @@
+     /// Non-positive values:
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// assert_eq!(0_f128.log(10.0), f128::NEG_INFINITY);
+     /// assert!((-42_f128).log(10.0).is_nan());
+@@ -214,7 +214,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let two = 2.0f128;
+     ///
+@@ -228,7 +228,7 @@
+     /// Non-positive values:
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// assert_eq!(0_f128.log2(), f128::NEG_INFINITY);
+     /// assert!((-42_f128).log2().is_nan());
+@@ -255,7 +255,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let ten = 10.0f128;
+     ///
+@@ -269,7 +269,7 @@
+     /// Non-positive values:
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// assert_eq!(0_f128.log10(), f128::NEG_INFINITY);
+     /// assert!((-42_f128).log10().is_nan());
+@@ -298,7 +298,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 8.0f128;
+     ///
+@@ -334,7 +334,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 2.0f128;
+     /// let y = 3.0f128;
+@@ -364,7 +364,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = std::f128::consts::FRAC_PI_2;
+     ///
+@@ -392,7 +392,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 2.0 * std::f128::consts::PI;
+     ///
+@@ -423,7 +423,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = std::f128::consts::FRAC_PI_4;
+     /// let abs_difference = (x.tan() - 1.0).abs();
+@@ -455,7 +455,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let f = std::f128::consts::FRAC_PI_4;
+     ///
+@@ -490,7 +490,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let f = std::f128::consts::FRAC_PI_4;
+     ///
+@@ -524,7 +524,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let f = 1.0f128;
+     ///
+@@ -564,7 +564,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// // Positive angles measured counter-clockwise
+     /// // from positive x axis
+@@ -606,7 +606,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = std::f128::consts::FRAC_PI_4;
+     /// let f = x.sin_cos();
+@@ -642,7 +642,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 1e-8_f128;
+     ///
+@@ -678,7 +678,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 1e-8_f128;
+     ///
+@@ -693,7 +693,7 @@
+     /// Out-of-range values:
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// assert_eq!((-1.0_f128).ln_1p(), f128::NEG_INFINITY);
+     /// assert!((-2.0_f128).ln_1p().is_nan());
+@@ -722,7 +722,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let e = std::f128::consts::E;
+     /// let x = 1.0f128;
+@@ -757,7 +757,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let e = std::f128::consts::E;
+     /// let x = 1.0f128;
+@@ -792,7 +792,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let e = std::f128::consts::E;
+     /// let x = 1.0f128;
+@@ -824,7 +824,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 1.0f128;
+     /// let f = x.sinh().asinh();
+@@ -854,7 +854,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 1.0f128;
+     /// let f = x.cosh().acosh();
+@@ -884,7 +884,7 @@
+     ///
+     /// ```
+     /// #![feature(f128)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = std::f128::consts::FRAC_PI_6;
+     /// let f = x.tanh().atanh();
+@@ -918,7 +918,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// #![feature(float_gamma)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 5.0f128;
+     ///
+@@ -953,7 +953,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// #![feature(float_gamma)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 2.0f128;
+     ///
+@@ -988,7 +988,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// #![feature(float_erf)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     /// /// The error function relates what percent of a normal distribution lies
+     /// /// within `x` standard deviations (scaled by `1/sqrt(2)`).
+     /// fn within_standard_deviations(x: f128) -> f128 {
+@@ -1027,7 +1027,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// #![feature(float_erf)]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     /// let x: f128 = 0.123;
+     ///
+     /// let one = x.erf() + x.erfc();
+diff --git a/library/std/src/num/f16.rs b/library/std/src/num/f16.rs
+--- a/library/std/src/num/f16.rs
++++ b/library/std/src/num/f16.rs
+@@ -34,7 +34,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 2.0_f16;
+     /// let abs_difference = (x.powf(2.0) - (x * x)).abs();
+@@ -64,7 +64,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let one = 1.0f16;
+     /// // e^1
+@@ -95,7 +95,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let f = 2.0f16;
+     ///
+@@ -126,7 +126,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let one = 1.0f16;
+     /// // e^1
+@@ -142,7 +142,7 @@
+     /// Non-positive values:
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// assert_eq!(0_f16.ln(), f16::NEG_INFINITY);
+     /// assert!((-42_f16).ln().is_nan());
+@@ -173,7 +173,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let five = 5.0f16;
+     ///
+@@ -187,7 +187,7 @@
+     /// Non-positive values:
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// assert_eq!(0_f16.log(10.0), f16::NEG_INFINITY);
+     /// assert!((-42_f16).log(10.0).is_nan());
+@@ -214,7 +214,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let two = 2.0f16;
+     ///
+@@ -228,7 +228,7 @@
+     /// Non-positive values:
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// assert_eq!(0_f16.log2(), f16::NEG_INFINITY);
+     /// assert!((-42_f16).log2().is_nan());
+@@ -255,7 +255,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let ten = 10.0f16;
+     ///
+@@ -269,7 +269,7 @@
+     /// Non-positive values:
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// assert_eq!(0_f16.log10(), f16::NEG_INFINITY);
+     /// assert!((-42_f16).log10().is_nan());
+@@ -300,7 +300,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 2.0f16;
+     /// let y = 3.0f16;
+@@ -330,7 +330,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = std::f16::consts::FRAC_PI_2;
+     ///
+@@ -358,7 +358,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 2.0 * std::f16::consts::PI;
+     ///
+@@ -389,7 +389,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = std::f16::consts::FRAC_PI_4;
+     /// let abs_difference = (x.tan() - 1.0).abs();
+@@ -421,7 +421,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let f = std::f16::consts::FRAC_PI_4;
+     ///
+@@ -456,7 +456,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let f = std::f16::consts::FRAC_PI_4;
+     ///
+@@ -490,7 +490,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let f = 1.0f16;
+     ///
+@@ -530,7 +530,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// // Positive angles measured counter-clockwise
+     /// // from positive x axis
+@@ -572,7 +572,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = std::f16::consts::FRAC_PI_4;
+     /// let f = x.sin_cos();
+@@ -608,7 +608,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 1e-4_f16;
+     ///
+@@ -644,7 +644,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 1e-4_f16;
+     ///
+@@ -659,7 +659,7 @@
+     /// Out-of-range values:
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// assert_eq!((-1.0_f16).ln_1p(), f16::NEG_INFINITY);
+     /// assert!((-2.0_f16).ln_1p().is_nan());
+@@ -688,7 +688,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let e = std::f16::consts::E;
+     /// let x = 1.0f16;
+@@ -723,7 +723,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let e = std::f16::consts::E;
+     /// let x = 1.0f16;
+@@ -758,7 +758,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let e = std::f16::consts::E;
+     /// let x = 1.0f16;
+@@ -790,7 +790,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 1.0f16;
+     /// let f = x.sinh().asinh();
+@@ -820,7 +820,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 1.0f16;
+     /// let f = x.cosh().acosh();
+@@ -850,7 +850,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = std::f16::consts::FRAC_PI_6;
+     /// let f = x.tanh().atanh();
+@@ -883,7 +883,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 5.0f16;
+     ///
+@@ -917,7 +917,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 2.0f16;
+     ///
+@@ -951,7 +951,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     /// /// The error function relates what percent of a normal distribution lies
+     /// /// within `x` standard deviations (scaled by `1/sqrt(2)`).
+     /// fn within_standard_deviations(x: f16) -> f16 {
+@@ -989,7 +989,7 @@
+     ///
+     /// ```
+     /// #![feature(f16)]
+-    /// # #[cfg(target_has_reliable_f16_math)] {
++    /// # #[cfg(all(target_has_reliable_f16_math, not(target_env = "ohos")))] {
+     /// let x: f16 = 0.123;
+     ///
+     /// let one = x.erf() + x.erfc();

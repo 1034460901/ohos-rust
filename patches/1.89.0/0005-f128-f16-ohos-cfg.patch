@@ -1,1 +1,274 @@
-ZGlmZiAtLWdpdCBhL2xpYnJhcnkvc3RkL3NyYy9udW0vZjEyOC5ycyBiL2xpYnJhcnkvc3RkL3NyYy9udW0vZjEyOC5ycwotLS0gYS9saWJyYXJ5L3N0ZC9zcmMvbnVtL2YxMjgucnMKKysrIGIvbGlicmFyeS9zdGQvc3JjL251bS9mMTI4LnJzCkBAIC0yOSw3ICsyOSw3IEBACiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxMjgpXQogICAgIC8vLyAjICNbY2ZnKG5vdChtaXJpKSldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgeCA9IDIuMF9mMTI4OwogICAgIC8vLyBsZXQgYWJzX2RpZmZlcmVuY2UgPSAoeC5wb3dmKDIuMCkgLSAoeCAqIHgpKS5hYnMoKTsKQEAgLTU5LDcgKzU5LDcgQEAKICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCiAgICAgLy8vICMgI1tjZmcobm90KG1pcmkpKV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCBvbmUgPSAxLjBmMTI4OwogICAgIC8vLyAvLyBlXjEKQEAgLTkxLDcgKzkxLDcgQEAKICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCiAgICAgLy8vICMgI1tjZmcobm90KG1pcmkpKV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCBmID0gMi4wZjEyODsKICAgICAvLy8KQEAgLTEyMyw3ICsxMjMsNyBAQAogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KICAgICAvLy8gIyAjW2NmZyhub3QobWlyaSkpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gbGV0IG9uZSA9IDEuMGYxMjg7CiAgICAgLy8vIC8vIGVeMQpAQCAtMTQwLDcgKzE0MCw3IEBACiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxMjgpXQogICAgIC8vLyAjICNbY2ZnKG5vdChtaXJpKSldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBhc3NlcnRfZXEhKDBfZjEyOC5sbigpLCBmMTI4OjpORUdfSU5GSU5JVFkpOwogICAgIC8vLyBhc3NlcnQhKCgtNDJfZjEyOCkubG4oKS5pc19uYW4oKSk7CkBAIC0xNzIsNyArMTcyLDcgQEAKICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCiAgICAgLy8vICMgI1tjZmcobm90KG1pcmkpKV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCBmaXZlID0gNS4wZjEyODsKICAgICAvLy8KQEAgLTE4Nyw3ICsxODcsNyBAQAogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KICAgICAvLy8gIyAjW2NmZyhub3QobWlyaSkpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gYXNzZXJ0X2VxISgwX2YxMjgubG9nKDEwLjApLCBmMTI4OjpORUdfSU5GSU5JVFkpOwogICAgIC8vLyBhc3NlcnQhKCgtNDJfZjEyOCkubG9nKDEwLjApLmlzX25hbigpKTsKQEAgLTIxNSw3ICsyMTUsNyBAQAogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KICAgICAvLy8gIyAjW2NmZyhub3QobWlyaSkpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gbGV0IHR3byA9IDIuMGYxMjg7CiAgICAgLy8vCkBAIC0yMzAsNyArMjMwLDcgQEAKICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCiAgICAgLy8vICMgI1tjZmcobm90KG1pcmkpKV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGFzc2VydF9lcSEoMF9mMTI4LmxvZzIoKSwgZjEyODo6TkVHX0lORklOSVRZKTsKICAgICAvLy8gYXNzZXJ0ISgoLTQyX2YxMjgpLmxvZzIoKS5pc19uYW4oKSk7CkBAIC0yNTgsNyArMjU4LDcgQEAKICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCiAgICAgLy8vICMgI1tjZmcobm90KG1pcmkpKV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCB0ZW4gPSAxMC4wZjEyODsKICAgICAvLy8KQEAgLTI3Myw3ICsyNzMsNyBAQAogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KICAgICAvLy8gIyAjW2NmZyhub3QobWlyaSkpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gYXNzZXJ0X2VxISgwX2YxMjgubG9nMTAoKSwgZjEyODo6TkVHX0lORklOSVRZKTsKICAgICAvLy8gYXNzZXJ0ISgoLTQyX2YxMjgpLmxvZzEwKCkuaXNfbmFuKCkpOwpAQCAtMzAzLDcgKzMwMyw3IEBACiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxMjgpXQogICAgIC8vLyAjICNbY2ZnKG5vdChtaXJpKSldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgeCA9IDguMGYxMjg7CiAgICAgLy8vCkBAIC0zNDAsNyArMzQwLDcgQEAKICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCiAgICAgLy8vICMgI1tjZmcobm90KG1pcmkpKV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCB4ID0gMi4wZjEyODsKICAgICAvLy8gbGV0IHkgPSAzLjBmMTI4OwpAQCAtMzcxLDcgKzM3MSw3IEBACiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxMjgpXQogICAgIC8vLyAjICNbY2ZnKG5vdChtaXJpKSldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgeCA9IHN0ZDo6ZjEyODo6Y29uc3RzOjpGUkFDX1BJXzI7CiAgICAgLy8vCkBAIC00MDAsNyArNDAwLDcgQEAKICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCiAgICAgLy8vICMgI1tjZmcobm90KG1pcmkpKV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCB4ID0gMi4wICogc3RkOjpmMTI4Ojpjb25zdHM6OlBJOwogICAgIC8vLwpAQCAtNDMyLDcgKzQzMiw3IEBACiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxMjgpXQogICAgIC8vLyAjICNbY2ZnKG5vdChtaXJpKSldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgeCA9IHN0ZDo6ZjEyODo6Y29uc3RzOjpGUkFDX1BJXzQ7CiAgICAgLy8vIGxldCBhYnNfZGlmZmVyZW5jZSA9ICh4LnRhbigpIC0gMS4wKS5hYnMoKTsKQEAgLTUwMSw3ICs1MDEsNyBAQAogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KICAgICAvLy8gIyAjW2NmZyhub3QobWlyaSkpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gbGV0IGYgPSBzdGQ6OmYxMjg6OmNvbnN0czo6RlJBQ19QSV80OwogICAgIC8vLwpAQCAtNTM2LDcgKzUzNiw3IEBACiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxMjgpXQogICAgIC8vLyAjICNbY2ZnKG5vdChtaXJpKSldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgZiA9IDEuMGYxMjg7CiAgICAgLy8vCkBAIC01NzUsNyArNTc1LDcgQEAKICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCiAgICAgLy8vICMgI1tjZmcobm90KG1pcmkpKV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIC8vIFBvc2l0aXZlIGFuZ2xlcyBtZWFzdXJlZCBjb3VudGVyLWNsb2Nrd2lzZQogICAgIC8vLyAvLyBmcm9tIHBvc2l0aXZlIHggYXhpcwpAQCAtNjE4LDcgKzYxOCw3IEBACiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxMjgpXQogICAgIC8vLyAjICNbY2ZnKG5vdChtaXJpKSldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgeCA9IHN0ZDo6ZjEyODo6Y29uc3RzOjpGUkFDX1BJXzQ7CiAgICAgLy8vIGxldCBmID0geC5zaW5fY29zKCk7CkBAIC02NTQsNyArNjU0LDcgQEAKICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCiAgICAgLy8vICMgI1tjZmcobm90KG1pcmkpKV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCB4ID0gMWUtOF9mMTI4OwogICAgIC8vLwpAQCAtNjkxLDcgKzY5MSw3IEBACiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxMjgpXQogICAgIC8vLyAjICNbY2ZnKG5vdChtaXJpKSldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgeCA9IDFlLThfZjEyODsKICAgICAvLy8KQEAgLTczNyw3ICs3MzcsNyBAQAogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KICAgICAvLy8gIyAjW2NmZyhub3QobWlyaSkpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gbGV0IGUgPSBzdGQ6OmYxMjg6OmNvbnN0czo6RTsKICAgICAvLy8gbGV0IHggPSAxLjBmMTI4OwpAQCAtNzczLDcgKzc3Myw3IEBACiAgICAgLy8vIGBgYAogICAgIC8vLyAjIVtmZWF0dXJlKGYxMjgpXQogICAgIC8vLyAjICNbY2ZnKG5vdChtaXJpKSldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgZSA9IHN0ZDo6ZjEyODo6Y29uc3RzOjpFOwogICAgIC8vLyBsZXQgeCA9IDEuMGYxMjg7CkBAIC04MDksNyArODA5LDcgQEAKICAgICAvLy8gYGBgCiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCiAgICAgLy8vICMgI1tjZmcobm90KG1pcmkpKV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCBlID0gc3RkOjpmMTI4Ojpjb25zdHM6OkU7CiAgICAgLy8vIGxldCB4ID0gMS4wZjEyODsKQEAgLTkxMCw3ICs5MTAsNyBAQAogICAgIC8vLyBgYGAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KICAgICAvLy8gIyAjW2NmZyhub3QobWlyaSkpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8KICAgICAvLy8gbGV0IGUgPSBzdGQ6OmYxMjg6OmNvbnN0czo6RTsKICAgICAvLy8gbGV0IGYgPSBlLnRhbmgoKS5hdGFuaCgpOwpAQCAtOTQ1LDcgKzk0NSw3IEBACiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCiAgICAgLy8vICMhW2ZlYXR1cmUoZmxvYXRfZ2FtbWEpXQogICAgIC8vLyAjICNbY2ZnKG5vdChtaXJpKSldCi0gICAgLy8vICMgI1tjZmcodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgpXSB7CisgICAgLy8vICMgI1tjZmcoYWxsKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoLCBub3QodGFyZ2V0X2VudiA9ICJvaG9zIikpKV0gewogICAgIC8vLwogICAgIC8vLyBsZXQgeCA9IDUuMGYxMjg7CiAgICAgLy8vCkBAIC05ODEsNyArOTgxLDcgQEAKICAgICAvLy8gIyFbZmVhdHVyZShmMTI4KV0KICAgICAvLy8gIyFbZmVhdHVyZShmbG9hdF9nYW1tYSldCiAgICAgLy8vICMgI1tjZmcobm90KG1pcmkpKV0KLSAgICAvLy8gIyAjW2NmZyh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCldIHsKKyAgICAvLy8gIyAjW2NmZyhhbGwodGFyZ2V0X2hhc19yZWxpYWJsZV9mMTI4X21hdGgsIG5vdCh0YXJnZXRfZW52ID0gIm9ob3MiKSkpXSB7CiAgICAgLy8vCiAgICAgLy8vIGxldCB4ID0gMi4wZjEyODsKICAgICAvLy8KQEAgLTEwMTcsNyArMTAxNyw3IEBACiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCiAgICAgLy8vICMhW2ZlYXR1cmUoZmxvYXRfZXJmKV0KICAgICAvLy8gIyAjW2NmZyhub3QobWlyaSkpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8gLy8vIFRoZSBlcnJvciBmdW5jdGlvbiByZWxhdGVzIHdoYXQgcGVyY2VudCBvZiBhIG5vcm1hbCBkaXN0cmlidXRpb24gbGllcwogICAgIC8vLyAvLy8gd2l0aGluIGB4YCBzdGFuZGFyZCBkZXZpYXRpb25zIChzY2FsZWQgYnkgYDEvc3FydCgyKWApLgogICAgIC8vLyBmbiB3aXRoaW5fc3RhbmRhcmRfZGV2aWF0aW9ucyh4OiBmMTI4KSAtPiBmMTI4IHsKQEAgLTEwNTcsNyArMTA1Nyw3IEBACiAgICAgLy8vICMhW2ZlYXR1cmUoZjEyOCldCiAgICAgLy8vICMhW2ZlYXR1cmUoZmxvYXRfZXJmKV0KICAgICAvLy8gIyAjW2NmZyhub3QobWlyaSkpXQotICAgIC8vLyAjICNbY2ZnKHRhcmdldF9oYXNfcmVsaWFibGVfZjEyOF9tYXRoKV0geworICAgIC8vLyAjICNbY2ZnKGFsbCh0YXJnZXRfaGFzX3JlbGlhYmxlX2YxMjhfbWF0aCwgbm90KHRhcmdldF9lbnYgPSAib2hvcyIpKSldIHsKICAgICAvLy8gbGV0IHg6IGYxMjggPSAwLjEyMzsKICAgICAvLy8KICAgICAvLy8gbGV0IG9uZSA9IHguZXJmKCkgKyB4LmVyZmMoKTsKZGlmZiAtLWdpdCBhL2xpYnJhcnkvc3RkL3NyYy9udW0vZjE2LnJzIGIvbGlicmFyeS9zdGQvc3JjL251bS9mMTYucnMK
+diff --git a/library/std/src/num/f128.rs b/library/std/src/num/f128.rs
+--- a/library/std/src/num/f128.rs
++++ b/library/std/src/num/f128.rs
+@@ -29,7 +29,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 2.0_f128;
+     /// let abs_difference = (x.powf(2.0) - (x * x)).abs();
+@@ -59,7 +59,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let one = 1.0f128;
+     /// // e^1
+@@ -91,7 +91,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let f = 2.0f128;
+     ///
+@@ -123,7 +123,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let one = 1.0f128;
+     /// // e^1
+@@ -140,7 +140,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// assert_eq!(0_f128.ln(), f128::NEG_INFINITY);
+     /// assert!((-42_f128).ln().is_nan());
+@@ -172,7 +172,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let five = 5.0f128;
+     ///
+@@ -187,7 +187,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// assert_eq!(0_f128.log(10.0), f128::NEG_INFINITY);
+     /// assert!((-42_f128).log(10.0).is_nan());
+@@ -215,7 +215,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let two = 2.0f128;
+     ///
+@@ -230,7 +230,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// assert_eq!(0_f128.log2(), f128::NEG_INFINITY);
+     /// assert!((-42_f128).log2().is_nan());
+@@ -258,7 +258,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let ten = 10.0f128;
+     ///
+@@ -273,7 +273,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// assert_eq!(0_f128.log10(), f128::NEG_INFINITY);
+     /// assert!((-42_f128).log10().is_nan());
+@@ -303,7 +303,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 8.0f128;
+     ///
+@@ -340,7 +340,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 2.0f128;
+     /// let y = 3.0f128;
+@@ -371,7 +371,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = std::f128::consts::FRAC_PI_2;
+     ///
+@@ -400,7 +400,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 2.0 * std::f128::consts::PI;
+     ///
+@@ -432,7 +432,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = std::f128::consts::FRAC_PI_4;
+     /// let abs_difference = (x.tan() - 1.0).abs();
+@@ -501,7 +501,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let f = std::f128::consts::FRAC_PI_4;
+     ///
+@@ -536,7 +536,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let f = 1.0f128;
+     ///
+@@ -575,7 +575,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// // Positive angles measured counter-clockwise
+     /// // from positive x axis
+@@ -618,7 +618,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = std::f128::consts::FRAC_PI_4;
+     /// let f = x.sin_cos();
+@@ -654,7 +654,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 1e-8_f128;
+     ///
+@@ -691,7 +691,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 1e-8_f128;
+     ///
+@@ -737,7 +737,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let e = std::f128::consts::E;
+     /// let x = 1.0f128;
+@@ -773,7 +773,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let e = std::f128::consts::E;
+     /// let x = 1.0f128;
+@@ -809,7 +809,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let e = std::f128::consts::E;
+     /// let x = 1.0f128;
+@@ -910,7 +910,7 @@
+     /// ```
+     /// #![feature(f128)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let e = std::f128::consts::E;
+     /// let f = e.tanh().atanh();
+@@ -945,7 +945,7 @@
+     /// #![feature(f128)]
+     /// #![feature(float_gamma)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 5.0f128;
+     ///
+@@ -981,7 +981,7 @@
+     /// #![feature(f128)]
+     /// #![feature(float_gamma)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     ///
+     /// let x = 2.0f128;
+     ///
+@@ -1017,7 +1017,7 @@
+     /// #![feature(f128)]
+     /// #![feature(float_erf)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     /// /// The error function relates what percent of a normal distribution lies
+     /// /// within `x` standard deviations (scaled by `1/sqrt(2)`).
+     /// fn within_standard_deviations(x: f128) -> f128 {
+@@ -1057,7 +1057,7 @@
+     /// #![feature(f128)]
+     /// #![feature(float_erf)]
+     /// # #[cfg(not(miri))]
+-    /// # #[cfg(target_has_reliable_f128_math)] {
++    /// # #[cfg(all(target_has_reliable_f128_math, not(target_env = "ohos")))] {
+     /// let x: f128 = 0.123;
+     ///
+     /// let one = x.erf() + x.erfc();
+diff --git a/library/std/src/num/f16.rs b/library/std/src/num/f16.rs

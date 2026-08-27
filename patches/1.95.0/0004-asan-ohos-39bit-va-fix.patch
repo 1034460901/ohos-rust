@@ -1,1 +1,231 @@
-RnJvbSAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIE1vbiBTZXAgMTcgMDA6MDA6MDAgMjAwMApGcm9tOiBPSE9TIFJ1c3QgPG9ob3MtcnVzdEBleGFtcGxlLmNvbT4KRGF0ZTogVGh1LCAxMyBBdWcgMjAyNiAwMDowMDowMCArMDAwMApTdWJqZWN0OiBbUEFUQ0hdIE9IT1Mgc2FuaXRpemVyOiBBU0FOL0hXQVNBTi9MU0FOIDM5LWJpdCBWQSArIGNsYW5nL3N5c3Jvb3QvcGVyc29uYWxpdHkgZml4ZXMKCkNvbWJpbmVkIHNhbml0aXplciBmaXhlcyBmb3IgT0hPUyBhYXJjaDY0ICgzOS1iaXQgVkEpOgoKMS4gQVNBTi9IV0FTQU4vTFNBTiBhbGxvY2F0b3Igc2l6ZToKICAgLSBBZGQgU0FOSVRJWkVSX09IT1MgbWFjcm8gaW4gc2FuaXRpemVyX3BsYXRmb3JtLmgKICAgLSBBU0FOOiB1c2UgMTI4R0IgYWxsb2NhdG9yIChrQWxsb2NhdG9yU2l6ZT0weDIwMDAwMDAwMDApIGZvciBPSE9TCiAgICAgKGRlZmF1bHQgNFRCIGV4Y2VlZHMgT0hPUyAzOS1iaXQgVkEgLyA1MTJHQiB1c2VyIHNwYWNlKQogICAtIEhXQVNBTjogc2tpcCA0VEIgYWxsb2NhdG9yIGZvciBPSE9TLCBmYWxsIHRocm91Z2ggdG8gMTI4R0IgcGF0aAogICAtIExTQU46IGFkZCBTQU5JVElaRVJfT0hPUyB0byBhYXJjaDY0IGJyYW5jaCAoYmFja3BvcnQgZnJvbSAxLjEwMC4wKQoKMi4gU2FuaXRpemVyIENNYWtlIGNsYW5nIG92ZXJyaWRlOgogICAtIFVzZSBPSE9TIFNESyBjbGFuZy9jbGFuZysrIGZvciBzYW5pdGl6ZXIgYnVpbGRzCiAgIC0gQWRkIC1mdXNlLWxkPWxsZCB0byBjZmxhZ3MvY3h4ZmxhZ3MgKHJlcXVpcmVkIGZvciAtLWNvZGUtc2lnbikKICAgLSBBZGQgLWZuby1lbXVsYXRlZC10bHMgYW5kIC1nej1ub25lIHRvIGNmbGFncy9jeHhmbGFncwoKMy4gU2FuaXRpemVyIHN5c2luZm8gKyBzb2NrZXQgKyB0YXJnZXQvc3lzcm9vdDoKICAgLSBBZGQgLS10YXJnZXQgYW5kIC0tc3lzcm9vdCB0byBjZmxhZ3MvY3h4ZmxhZ3MvbGRmbGFncwogICAgIChPSE9TIFNESyBjbGFuZyBkZWZhdWx0cyB0byBob3N0IHRhcmdldCB3aXRob3V0IC0tdGFyZ2V0KQogICAtIEFkZCAtRF9VQVBJX0xJTlVYX1NPQ0tFVF9IIHRvIHByZXZlbnQgc29ja2FkZHJfc3RvcmFnZSByZWRlZmluaXRpb24KICAgLSBBZGQgbGRmbGFncyBPSE9TIGJsb2NrICgtLXRhcmdldCwgLS1zeXNyb290LCAtZnVzZS1sZD1sbGQsIC1XbCwtLWNvZGUtc2lnbikKICAgLSBJbmNsdWRlIDxzeXMvc3lzaW5mby5oPiBhdCB0b3Agb2Ygc2FuaXRpemVyX3BsYXRmb3JtX2xpbWl0c19wb3NpeC5jcHAKICAgICAoYmlvbmljIGd1YXJkcyBzdHJ1Y3Qgc3lzaW5mbyB3aXRoICNpZm5kZWYgX0xJTlVYX0tFUk5FTF9IOyBtdXN0CiAgICAgaW5jbHVkZSBiZWZvcmUgYW55IGhlYWRlciB0aGF0IGRlZmluZXMgX0xJTlVYX0tFUk5FTF9IKQoKNC4gX19nY2NfcGVyc29uYWxpdHlfdjAgc3R1YiAoYmFja3BvcnQgZnJvbSAxLjEwMC4wKToKICAgLSBOZXcgZmlsZSBzYW5pdGl6ZXJfZ2NjX3BlcnNvbmFsaXR5X3YwLmNwcAogICAtIEFkZCB0byBzYW5pdGl6ZXJfY29tbW9uL0NNYWtlTGlzdHMudHh0IHNvdXJjZSBsaXN0CiAgIC0gT0hPUyBTREsgaGFzIG5vIGxpYmdjY19laC5hOyBzdHViIHNhdGlzZmllcyBsaW5rZXIgcmVmZXJlbmNlcwoKLS0tCgpkaWZmIC0tZ2l0IGEvc3JjL2xsdm0tcHJvamVjdC9jb21waWxlci1ydC9saWIvc2FuaXRpemVyX2NvbW1vbi9zYW5pdGl6ZXJfcGxhdGZvcm0uaCBiL3NyYy9sbHZtLXByb2plY3QvY29tcGlsZXItcnQvbGliL3Nhbml0aXplcl9jb21tb24vc2FuaXRpemVyX3BsYXRmb3JtLmgKLS0tIGEvc3JjL2xsdm0tcHJvamVjdC9jb21waWxlci1ydC9saWIvc2FuaXRpemVyX2NvbW1vbi9zYW5pdGl6ZXJfcGxhdGZvcm0uaAorKysgYi9zcmMvbGx2bS1wcm9qZWN0L2NvbXBpbGVyLXJ0L2xpYi9zYW5pdGl6ZXJfY29tbW9uL3Nhbml0aXplcl9wbGF0Zm9ybS5oCkBAIC0xMzYsNiArMTM2LDEzIEBACiAjICBkZWZpbmUgU0FOSVRJWkVSX0FORFJPSUQgMAogI2VuZGlmCiAKKworI2lmIGRlZmluZWQoX19PSE9TX18pCisjICBkZWZpbmUgU0FOSVRJWkVSX09IT1MgMQorI2Vsc2UKKyMgIGRlZmluZSBTQU5JVElaRVJfT0hPUyAwCisjZW5kaWYKKwogI2lmIGRlZmluZWQoX19GdWNoc2lhX18pCiAjICBkZWZpbmUgU0FOSVRJWkVSX0ZVQ0hTSUEgMQogI2Vsc2UKZGlmZiAtLWdpdCBhL3NyYy9sbHZtLXByb2plY3QvY29tcGlsZXItcnQvbGliL2FzYW4vYXNhbl9hbGxvY2F0b3IuaCBiL3NyYy9sbHZtLXByb2plY3QvY29tcGlsZXItcnQvbGliL2FzYW4vYXNhbl9hbGxvY2F0b3IuaAotLS0gYS9zcmMvbGx2bS1wcm9qZWN0L2NvbXBpbGVyLXJ0L2xpYi9hc2FuL2FzYW5fYWxsb2NhdG9yLmgKKysrIGIvc3JjL2xsdm0tcHJvamVjdC9jb21waWxlci1ydC9saWIvYXNhbi9hc2FuX2FsbG9jYXRvci5oCkBAIC0yMDUsNyArMjA1LDggQEAKICMgICAgICBlbmRpZgogdHlwZWRlZiBEZWZhdWx0U2l6ZUNsYXNzTWFwIFNpemVDbGFzc01hcDsKICMgICAgZWxpZiBkZWZpbmVkKF9fYWFyY2g2NF9fKSAmJiBcCi0gICAgICAgIChTQU5JVElaRVJfQU5EUk9JRCB8fCBkZWZpbmVkKFNBTklUSVpFUl9BQVJDSDY0XzM5QklUX1ZBKSkKKyAgICAgICAgKFNBTklUSVpFUl9BTkRST0lEIHx8IGRlZmluZWQoU0FOSVRJWkVSX0FBUkNINjRfMzlCSVRfVkEpIHx8IFwKKyAgICAgICAgIFNBTklUSVpFUl9PSE9TKQogLy8gQW5kcm9pZCBuZWVkcyB0byBzdXBwb3J0IDM5LCA0MiBhbmQgNDggYml0IFZNQS4KIGNvbnN0IHVwdHIga0FsbG9jYXRvclNpemUgID0gIDB4MjAwMDAwMDAwMFVMTDsgIC8vIDEyOEcuCiB0eXBlZGVmIFZlcnlDb21wYWN0U2l6ZUNsYXNzTWFwIFNpemVDbGFzc01hcDsKZGlmZiAtLWdpdCBhL3NyYy9sbHZtLXByb2plY3QvY29tcGlsZXItcnQvbGliL2h3YXNhbi9od2FzYW5fYWxsb2NhdG9yLmggYi9zcmMvbGx2bS1wcm9qZWN0L2NvbXBpbGVyLXJ0L2xpYi9od2FzYW4vaHdhc2FuX2FsbG9jYXRvci5oCi0tLSBhL3NyYy9sbHZtLXByb2plY3QvY29tcGlsZXItcnQvbGliL2h3YXNhbi9od2FzYW5fYWxsb2NhdG9yLmgKKysrIGIvc3JjL2xsdm0tcHJvamVjdC9jb21waWxlci1ydC9saWIvaHdhc2FuL2h3YXNhbl9hbGxvY2F0b3IuaApAQCAtNzUsNyArNzUsNyBAQAogICBzdGF0aWMgY29uc3QgdXB0ciBrU3BhY2VTaXplID0gMVVMTCA8PCBrQWRkcmVzc1RhZ1NoaWZ0OwogICB0eXBlZGVmIF9fc2FuaXRpemVyOjpEZWZhdWx0U2l6ZUNsYXNzTWFwIFNpemVDbGFzc01hcDsKICNlbGlmIFNBTklUSVpFUl9MSU5VWCAmJiAhU0FOSVRJWkVSX0FORFJPSUQgJiYgXAotICAgICFkZWZpbmVkKFNBTklUSVpFUl9BQVJDSDY0XzM5QklUX1ZBKQorICAgICFkZWZpbmVkKFNBTklUSVpFUl9BQVJDSDY0XzM5QklUX1ZBKSAmJiAhU0FOSVRJWkVSX09IT1MKICAgc3RhdGljIGNvbnN0IHVwdHIga1NwYWNlU2l6ZSA9IDB4NDAwMDAwMDAwMDBVTEw7ICAvLyA0VC4KICAgdHlwZWRlZiBfX3Nhbml0aXplcjo6RGVmYXVsdFNpemVDbGFzc01hcCBTaXplQ2xhc3NNYXA7CiAjZWxzZQpkaWZmIC0tZ2l0IGEvc3JjL2xsdm0tcHJvamVjdC9jb21waWxlci1ydC9saWIvbHNhbi9sc2FuX2FsbG9jYXRvci5oIGIvc3JjL2xsdm0tcHJvamVjdC9jb21waWxlci1ydC9saWIvbHNhbi9sc2FuX2FsbG9jYXRvci5oCi0tLSBhL3NyYy9sbHZtLXByb2plY3QvY29tcGlsZXItcnQvbGliL2xzYW4vbHNhbl9hbGxvY2F0b3IuaAorKysgYi9zcmMvbGx2bS1wcm9qZWN0L2NvbXBpbGVyLXJ0L2xpYi9sc2FuL2xzYW5fYWxsb2NhdG9yLmgKQEAgLTkzLDcgKzkzLDcgQEAKIGNvbnN0IHVwdHIga0FsbG9jYXRvclNwYWNlID0gMHg2MDAwMDAwMDAwMDBVTEw7CiBjb25zdCB1cHRyIGtBbGxvY2F0b3JTaXplICA9IDB4NDAwMDAwMDAwMDBVTEw7ICAvLyA0VC4KIHVzaW5nIExTYW5TaXplQ2xhc3NNYXAgPSBEZWZhdWx0U2l6ZUNsYXNzTWFwOwotIyAgZWxpZiBTQU5JVElaRVJfQU5EUk9JRCAmJiBkZWZpbmVkKF9fYWFyY2g2NF9fKQorIyAgZWxpZiAoU0FOSVRJWkVSX0FORFJPSUQgfHwgU0FOSVRJWkVSX09IT1MpICYmIGRlZmluZWQoX19hYXJjaDY0X18pCiBjb25zdCB1cHRyIGtBbGxvY2F0b3JTcGFjZSA9IDB4MzAwMDAwMDAwMFVMTDsKIGNvbnN0IHVwdHIga0FsbG9jYXRvclNpemUgPSAweDIwMDAwMDAwMDBVTEw7CiB1c2luZyBMU2FuU2l6ZUNsYXNzTWFwID0gVmVyeUNvbXBhY3RTaXplQ2xhc3NNYXA7CmRpZmYgLS1naXQgYS9zcmMvbGx2bS1wcm9qZWN0L2NvbXBpbGVyLXJ0L2xpYi9zYW5pdGl6ZXJfY29tbW9uL3Nhbml0aXplcl9nY2NfcGVyc29uYWxpdHlfdjAuY3BwIGIvc3JjL2xsdm0tcHJvamVjdC9jb21waWxlci1ydC9saWIvc2FuaXRpemVyX2NvbW1vbi9zYW5pdGl6ZXJfZ2NjX3BlcnNvbmFsaXR5X3YwLmNwcApuZXcgZmlsZSBtb2RlIDEwMDY0NAotLS0gL2Rldi9udWxsCisrKyBiL3NyYy9sbHZtLXByb2plY3QvY29tcGlsZXItcnQvbGliL3Nhbml0aXplcl9jb21tb24vc2FuaXRpemVyX2djY19wZXJzb25hbGl0eV92MC5jcHAKKy8vPT09LS0gc2FuaXRpemVyX2djY19wZXJzb25hbGl0eV92MC5jcHAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLT09PS8vCisvLworLy8gT0hPUzogUHJvdmlkZSBfX2djY19wZXJzb25hbGl0eV92MCBzdHViIGZvciBzYW5pdGl6ZXIgYXJjaGl2ZXMuCisvLyBPSE9TIFNESyBoYXMgbm8gbGliZ2NjX2VoLmEgb3IgbGlidW53aW5kLmE7IHRoaXMgc3R1YiBzYXRpc2ZpZXMgbGlua2VyCisvLyByZWZlcmVuY2VzIGZyb20gQysrIEVIIHRhYmxlcyB3aXRob3V0IHJlcXVpcmluZyB1bndpbmQgcnVudGltZS4KKy8vIFNhZmUgYmVjYXVzZSBzYW5pdGl6ZXJzIG5ldmVyIGFjdHVhbGx5IHRocm93IEMrKyBleGNlcHRpb25zICh0aGV5IGNhbGwKKy8vIERpZSgpIGluc3RlYWQpLiBUaGUgcGVyc29uYWxpdHkgZnVuY3Rpb24gaXMgbmV2ZXIgY2FsbGVkIGF0IHJ1bnRpbWUuCisvLworLy89PT0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tPT09Ly8KKworI2lmIGRlZmluZWQoX19PSE9TX18pCisKKyNpbmNsdWRlIDxzdGRpbnQuaD4KKwordHlwZWRlZiBlbnVtIHsKKyAgX1VSQ19OT19SRUFTT04gPSAwLAorICBfVVJDX0ZPUkVJR05fRVhDRVBUSU9OX0NBVUdIVCA9IDEsCisgIF9VUkNfRkFUQUxfUEhBU0UyX0VSUk9SID0gMiwKKyAgX1VSQ19GQVRBTF9QSEFTRTFfRVJST1IgPSAzLAorICBfVVJDX05PUk1BTF9TVE9QID0gNCwKKyAgX1VSQ19FTkRfT0ZfU1RBQ0sgPSA1LAorICBfVVJDX0hBTkRMRVJfRk9VTkQgPSA2LAorICBfVVJDX0lOU1RBTExfQ09OVEVYVCA9IDcsCisgIF9VUkNfQ09OVElOVUVfVU5XSU5EID0gOAorfSBfVW53aW5kX1JlYXNvbl9Db2RlOworCitzdHJ1Y3QgX1Vud2luZF9FeGNlcHRpb247CitzdHJ1Y3QgX1Vud2luZF9Db250ZXh0OworCitleHRlcm4gIkMiIF9VbndpbmRfUmVhc29uX0NvZGUgX19nY2NfcGVyc29uYWxpdHlfdjAoaW50IHZlcnNpb24sIGludCBhY3Rpb25zLAorICAgIHVpbnQ2NF90IGV4Y2VwdGlvbl9jbGFzcywgc3RydWN0IF9VbndpbmRfRXhjZXB0aW9uICp1ZV9oZWFkZXIsCisgICAgc3RydWN0IF9VbndpbmRfQ29udGV4dCAqY29udGV4dCkgeworICByZXR1cm4gX1VSQ19DT05USU5VRV9VTldJTkQ7Cit9CisKKyNlbmRpZiAvLyBfX09IT1NfXwpkaWZmIC0tZ2l0IGEvc3JjL2xsdm0tcHJvamVjdC9jb21waWxlci1ydC9saWIvc2FuaXRpemVyX2NvbW1vbi9DTWFrZUxpc3RzLnR4dCBiL3NyYy9sbHZtLXByb2plY3QvY29tcGlsZXItcnQvbGliL3Nhbml0aXplcl9jb21tb24vQ01ha2VMaXN0cy50eHQKLS0tIGEvc3JjL2xsdm0tcHJvamVjdC9jb21waWxlci1ydC9saWIvc2FuaXRpemVyX2NvbW1vbi9DTWFrZUxpc3RzLnR4dAorKysgYi9zcmMvbGx2bS1wcm9qZWN0L2NvbXBpbGVyLXJ0L2xpYi9zYW5pdGl6ZXJfY29tbW9uL0NNYWtlTGlzdHMudHh0CkBAIC00NSw2ICs0NSw3IEBACiAgIHNhbml0aXplcl90eXBlX3RyYWl0cy5jcHAKICAgc2FuaXRpemVyX3dpbi5jcHAKICAgc2FuaXRpemVyX3dpbl9pbnRlcmNlcHRpb24uY3BwCisgIHNhbml0aXplcl9nY2NfcGVyc29uYWxpdHlfdjAuY3BwCiAgICkKIAogc2V0KFNBTklUSVpFUl9TT1VSQ0VTCmRpZmYgLS1naXQgYS9zcmMvYm9vdHN0cmFwL3NyYy9jb3JlL2J1aWxkX3N0ZXBzL2xsdm0ucnMgYi9zcmMvYm9vdHN0cmFwL3NyYy9jb3JlL2J1aWxkX3N0ZXBzL2xsdm0ucnMKLS0tIGEvc3JjL2Jvb3RzdHJhcC9zcmMvY29yZS9idWlsZF9zdGVwcy9sbHZtLnJzCisrKyBiL3NyYy9ib290c3RyYXAvc3JjL2NvcmUvYnVpbGRfc3RlcHMvbGx2bS5ycwpAQCAtNzYyLDYgKzc2MiwxMyBAQAogICAgICAgICBOb25lID0+IChidWlsZGVyLmNjKHRhcmdldCksIGJ1aWxkZXIuY3h4KHRhcmdldCkudW53cmFwKCkpLAogICAgIH07CiAKKyAgICBsZXQgKGNjLCBjeHgpID0gaWYgdGFyZ2V0LmNvbnRhaW5zKCJvaG9zIikgeworICAgICAgICBsZXQgc2RrID0gc3RkOjpwYXRoOjpQYXRoOjpuZXcoIi9vcHQvb2hvcy1zZGsvbmF0aXZlL2xsdm0vYmluIik7CisgICAgICAgIChzZGsuam9pbigiY2xhbmciKSwgc2RrLmpvaW4oImNsYW5nKysiKSkKKyAgICB9IGVsc2UgeworICAgICAgICAoY2MsIGN4eCkKKyAgICB9OworCiAgICAgLy8gSWYgY2NhY2hlIGlzIGNvbmZpZ3VyZWQgd2UgaW5mb3JtIHRoZSBidWlsZCBhIGxpdHRsZSBkaWZmZXJlbnRseSBob3cKICAgICAvLyB0byBpbnZva2UgY2NhY2hlIHdoaWxlIGFsc28gaW52b2tpbmcgb3VyIGNvbXBpbGVycy4KICAgICBpZiB1c2VfY29tcGlsZXJfbGF1bmNoZXIgJiYgbGV0IFNvbWUocmVmIGNjYWNoZSkgPSBidWlsZGVyLmNvbmZpZy5jY2FjaGUgewpAQCAtODAxLDcgKzgwOCwxMyBAQAogICAgICAgICBjZmxhZ3MucHVzaChzKTsKICAgICB9CiAgICAgaWYgdGFyZ2V0LmNvbnRhaW5zKCJvaG9zIikgeworICAgICAgICBjZmxhZ3MucHVzaChmb3JtYXQhKCIgLS10YXJnZXQ9e3RhcmdldH0iKSk7CisgICAgICAgIGNmbGFncy5wdXNoKCIgLS1zeXNyb290PS9vcHQvb2hvcy1zZGsvbmF0aXZlL3N5c3Jvb3QiKTsKICAgICAgICAgY2ZsYWdzLnB1c2goIiAtRF9MSU5VWF9TWVNJTkZPX0giKTsKKyAgICAgICAgY2ZsYWdzLnB1c2goIiAtRF9VQVBJX0xJTlVYX1NPQ0tFVF9IIik7CisgICAgICAgIGNmbGFncy5wdXNoKCIgLWZ1c2UtbGQ9bGxkIik7CisgICAgICAgIGNmbGFncy5wdXNoKCIgLWZuby1lbXVsYXRlZC10bHMiKTsKKyAgICAgICAgY2ZsYWdzLnB1c2goIiAtZ3o9bm9uZSIpOwogICAgIH0KICAgICBpZiBidWlsZGVyLmNvbmZpZy5sbHZtX2NsYW5nX2NsLmlzX3NvbWUoKSB7CiAgICAgICAgIGNmbGFncy5wdXNoKGZvcm1hdCEoIiAtLXRhcmdldD17dGFyZ2V0fSIpKTsKQEAgLTgyNiwxMyArODM5LDI1IEBACiAgICAgICAgIGN4eGZsYWdzLnB1c2gocyk7CiAgICAgfQogICAgIGlmIHRhcmdldC5jb250YWlucygib2hvcyIpIHsKKyAgICAgICAgY3h4ZmxhZ3MucHVzaChmb3JtYXQhKCIgLS10YXJnZXQ9e3RhcmdldH0iKSk7CisgICAgICAgIGN4eGZsYWdzLnB1c2goIiAtLXN5c3Jvb3Q9L29wdC9vaG9zLXNkay9uYXRpdmUvc3lzcm9vdCIpOwogICAgICAgICBjeHhmbGFncy5wdXNoKCIgLURfTElOVVhfU1lTSU5GT19IIik7CisgICAgICAgIGN4eGZsYWdzLnB1c2goIiAtRF9VQVBJX0xJTlVYX1NPQ0tFVF9IIik7CisgICAgICAgIGN4eGZsYWdzLnB1c2goIiAtZnVzZS1sZD1sbGQiKTsKKyAgICAgICAgY3h4ZmxhZ3MucHVzaCgiIC1mbm8tZW11bGF0ZWQtdGxzIik7CisgICAgICAgIGN4eGZsYWdzLnB1c2goIiAtZ3o9bm9uZSIpOwogICAgIH0KICAgICBpZiBidWlsZGVyLmNvbmZpZy5sbHZtX2NsYW5nX2NsLmlzX3NvbWUoKSB7CiAgICAgICAgIGN4eGZsYWdzLnB1c2goZm9ybWF0ISgiIC0tdGFyZ2V0PXt0YXJnZXR9IikpOwogICAgIH0KIAogICAgIGNmZy5kZWZpbmUoIkNNQUtFX0NYWF9GTEFHUyIsIGN4eGZsYWdzKTsKKyAgICBpZiB0YXJnZXQuY29udGFpbnMoIm9ob3MiKSB7CisgICAgICAgIGNmZy5kZWZpbmUoCisgICAgICAgICAgICAiQ01BS0VfQVNNX0ZMQUdTIiwKKyAgICAgICAgICAgIGZvcm1hdCEoIiAtLXRhcmdldD17dGFyZ2V0fSAtLXN5c3Jvb3Q9L29wdC9vaG9zLXNkay9uYXRpdmUvc3lzcm9vdCAtRF9VQVBJX0xJTlVYX1NPQ0tFVF9IIC1mdXNlLWxkPWxsZCIpLAorICAgICAgICApOworICAgIH0KICAgICBpZiBsZXQgU29tZShhcikgPSBidWlsZGVyLmFyKHRhcmdldCkKICAgICAgICAgJiYgYXIuaXNfYWJzb2x1dGUoKQogICAgIHsKQEAgLTg3Miw2ICs4OTcsOSBAQAogICAgIH0KIAogICAgIGlmIHRhcmdldC5jb250YWlucygib2hvcyIpIHsKKyAgICAgICAgbGRmbGFncy5wdXNoX2FsbChmb3JtYXQhKCIgLS10YXJnZXQ9e3RhcmdldH0iKSk7CisgICAgICAgIGxkZmxhZ3MucHVzaF9hbGwoIiAtLXN5c3Jvb3Q9L29wdC9vaG9zLXNkay9uYXRpdmUvc3lzcm9vdCIpOworICAgICAgICBsZGZsYWdzLnB1c2hfYWxsKCIgLWZ1c2UtbGQ9bGxkIik7CiAgICAgICAgIGxkZmxhZ3MucHVzaF9hbGwoIi1XbCwtLWNvZGUtc2lnbiIpOwogICAgIH0KIApAQCAtMTQ2MCw2ICsxNDg4LDcgQEAKIAogICAgICAgICBpZiBzZWxmLnRhcmdldC5jb250YWlucygib2hvcyIpIHsKICAgICAgICAgICAgIGNmZy5kZWZpbmUoIkNPTVBJTEVSX1JUX1VTRV9CVUlMVElOU19MSUJSQVJZIiwgIk9OIik7CisgICAgICAgICAgICBjZmcuZGVmaW5lKCJTQU5JVElaRVJfQUFSQ0g2NF8zOUJJVF9WQSIsICJPTiIpOwogICAgICAgICB9CiAKICAgICAgICAgLy8gT24gRGFyd2luIHRhcmdldHMgdGhlIHNhbml0aXplciBydW50aW1lcyBhcmUgYnVpbGQgYXMgdW5pdmVyc2FsIGJpbmFyaWVzLgpkaWZmIC0tZ2l0IGEvc3JjL2xsdm0tcHJvamVjdC9jb21waWxlci1ydC9saWIvc2FuaXRpemVyX2NvbW1vbi9zYW5pdGl6ZXJfcGxhdGZvcm1fbGltaXRzX3Bvc2l4LmNwcCBiL3NyYy9sbHZtLXByb2plY3QvY29tcGlsZXItcnQvbGliL3Nhbml0aXplcl9jb21tb24vc2FuaXRpemVyX3BsYXRmb3JtX2xpbWl0c19wb3NpeC5jcHAKLS0tIGEvc3JjL2xsdm0tcHJvamVjdC9jb21waWxlci1ydC9saWIvc2FuaXRpemVyX2NvbW1vbi9zYW5pdGl6ZXJfcGxhdGZvcm1fbGltaXRzX3Bvc2l4LmNwcAorKysgYi9zcmMvbGx2bS1wcm9qZWN0L2NvbXBpbGVyLXJ0L2xpYi9zYW5pdGl6ZXJfY29tbW9uL3Nhbml0aXplcl9wbGF0Zm9ybV9saW1pdHNfcG9zaXguY3BwCkBAIC0zMDcsNiArMzA3LDEyIEBACiAgIHVuc2lnbmVkIHN0cnVjdF9zdGF0dmZzNjRfc3ogPSBzaXplb2Yoc3RydWN0IHN0YXR2ZnM2NCk7CiAjZW5kaWYgLy8gU0FOSVRJWkVSX0dMSUJDCiAKKyNpZiBTQU5JVElaRVJfTElOVVggJiYgIVNBTklUSVpFUl9HTElCQyAmJiAhU0FOSVRJWkVSX0FORFJPSUQKKy8vIG11c2wtYmFzZWQgTGludXggKE9IT1MsIEFscGluZSwgZXRjLikg4oCUIHN0cnVjdCBybGltaXQ2NCBpcyBhdmFpbGFibGUKKy8vIHZpYSBzeXMvcmVzb3VyY2UuaCAobWF5IGJlICNkZWZpbmUnZCB0byBzdHJ1Y3QgcmxpbWl0IG9uIG11c2wpCit1bnNpZ25lZCBzdHJ1Y3RfcmxpbWl0NjRfc3ogPSBzaXplb2Yoc3RydWN0IHJsaW1pdDY0KTsKKyNlbmRpZgorCiAjaWYgU0FOSVRJWkVSX0xJTlVYICYmICFTQU5JVElaRVJfQU5EUk9JRAogICB1bnNpZ25lZCBzdHJ1Y3RfdGltZXhfc3ogPSBzaXplb2Yoc3RydWN0IHRpbWV4KTsKICAgdW5zaWduZWQgc3RydWN0X21zcWlkX2RzX3N6ID0gc2l6ZW9mKHN0cnVjdCBtc3FpZF9kcyk7Cg==
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2000
+From: OHOS Rust <ohos-rust@example.com>
+Date: Thu, 13 Aug 2026 00:00:00 +0000
+Subject: [PATCH] OHOS sanitizer: ASAN/HWASAN/LSAN 39-bit VA + clang/sysroot/personality fixes
+
+Combined sanitizer fixes for OHOS aarch64 (39-bit VA):
+
+1. ASAN/HWASAN/LSAN allocator size:
+   - Add SANITIZER_OHOS macro in sanitizer_platform.h
+   - ASAN: use 128GB allocator (kAllocatorSize=0x2000000000) for OHOS
+     (default 4TB exceeds OHOS 39-bit VA / 512GB user space)
+   - HWASAN: skip 4TB allocator for OHOS, fall through to 128GB path
+   - LSAN: add SANITIZER_OHOS to aarch64 branch (backport from 1.100.0)
+
+2. Sanitizer CMake clang override:
+   - Use OHOS SDK clang/clang++ for sanitizer builds
+   - Add -fuse-ld=lld to cflags/cxxflags (required for --code-sign)
+   - Add -fno-emulated-tls and -gz=none to cflags/cxxflags
+
+3. Sanitizer sysinfo + socket + target/sysroot:
+   - Add --target and --sysroot to cflags/cxxflags/ldflags
+     (OHOS SDK clang defaults to host target without --target)
+   - Add -D_UAPI_LINUX_SOCKET_H to prevent sockaddr_storage redefinition
+   - Add ldflags OHOS block (--target, --sysroot, -fuse-ld=lld, -Wl,--code-sign)
+   - Include <sys/sysinfo.h> at top of sanitizer_platform_limits_posix.cpp
+     (bionic guards struct sysinfo with #ifndef _LINUX_KERNEL_H; must
+     include before any header that defines _LINUX_KERNEL_H)
+
+4. __gcc_personality_v0 stub (backport from 1.100.0):
+   - New file sanitizer_gcc_personality_v0.cpp
+   - Add to sanitizer_common/CMakeLists.txt source list
+   - OHOS SDK has no libgcc_eh.a; stub satisfies linker references
+
+---
+
+diff --git a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform.h b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform.h
+--- a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform.h
++++ b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform.h
+@@ -136,6 +136,13 @@
+ #  define SANITIZER_ANDROID 0
+ #endif
+ 
++
++#if defined(__OHOS__)
++#  define SANITIZER_OHOS 1
++#else
++#  define SANITIZER_OHOS 0
++#endif
++
+ #if defined(__Fuchsia__)
+ #  define SANITIZER_FUCHSIA 1
+ #else
+diff --git a/src/llvm-project/compiler-rt/lib/asan/asan_allocator.h b/src/llvm-project/compiler-rt/lib/asan/asan_allocator.h
+--- a/src/llvm-project/compiler-rt/lib/asan/asan_allocator.h
++++ b/src/llvm-project/compiler-rt/lib/asan/asan_allocator.h
+@@ -205,7 +205,8 @@
+ #      endif
+ typedef DefaultSizeClassMap SizeClassMap;
+ #    elif defined(__aarch64__) && \
+-        (SANITIZER_ANDROID || defined(SANITIZER_AARCH64_39BIT_VA))
++        (SANITIZER_ANDROID || defined(SANITIZER_AARCH64_39BIT_VA) || \
++         SANITIZER_OHOS)
+ // Android needs to support 39, 42 and 48 bit VMA.
+ const uptr kAllocatorSize  =  0x2000000000ULL;  // 128G.
+ typedef VeryCompactSizeClassMap SizeClassMap;
+diff --git a/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h b/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h
+--- a/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h
++++ b/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h
+@@ -75,7 +75,7 @@
+   static const uptr kSpaceSize = 1ULL << kAddressTagShift;
+   typedef __sanitizer::DefaultSizeClassMap SizeClassMap;
+ #elif SANITIZER_LINUX && !SANITIZER_ANDROID && \
+-    !defined(SANITIZER_AARCH64_39BIT_VA)
++    !defined(SANITIZER_AARCH64_39BIT_VA) && !SANITIZER_OHOS
+   static const uptr kSpaceSize = 0x40000000000ULL;  // 4T.
+   typedef __sanitizer::DefaultSizeClassMap SizeClassMap;
+ #else
+diff --git a/src/llvm-project/compiler-rt/lib/lsan/lsan_allocator.h b/src/llvm-project/compiler-rt/lib/lsan/lsan_allocator.h
+--- a/src/llvm-project/compiler-rt/lib/lsan/lsan_allocator.h
++++ b/src/llvm-project/compiler-rt/lib/lsan/lsan_allocator.h
+@@ -93,7 +93,7 @@
+ const uptr kAllocatorSpace = 0x600000000000ULL;
+ const uptr kAllocatorSize  = 0x40000000000ULL;  // 4T.
+ using LSanSizeClassMap = DefaultSizeClassMap;
+-#  elif SANITIZER_ANDROID && defined(__aarch64__)
++#  elif (SANITIZER_ANDROID || SANITIZER_OHOS) && defined(__aarch64__)
+ const uptr kAllocatorSpace = 0x3000000000ULL;
+ const uptr kAllocatorSize = 0x2000000000ULL;
+ using LSanSizeClassMap = VeryCompactSizeClassMap;
+diff --git a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_gcc_personality_v0.cpp b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_gcc_personality_v0.cpp
+new file mode 100644
+--- /dev/null
++++ b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_gcc_personality_v0.cpp
++//===-- sanitizer_gcc_personality_v0.cpp ----------------------------------===//
++//
++// OHOS: Provide __gcc_personality_v0 stub for sanitizer archives.
++// OHOS SDK has no libgcc_eh.a or libunwind.a; this stub satisfies linker
++// references from C++ EH tables without requiring unwind runtime.
++// Safe because sanitizers never actually throw C++ exceptions (they call
++// Die() instead). The personality function is never called at runtime.
++//
++//===----------------------------------------------------------------------===//
++
++#if defined(__OHOS__)
++
++#include <stdint.h>
++
++typedef enum {
++  _URC_NO_REASON = 0,
++  _URC_FOREIGN_EXCEPTION_CAUGHT = 1,
++  _URC_FATAL_PHASE2_ERROR = 2,
++  _URC_FATAL_PHASE1_ERROR = 3,
++  _URC_NORMAL_STOP = 4,
++  _URC_END_OF_STACK = 5,
++  _URC_HANDLER_FOUND = 6,
++  _URC_INSTALL_CONTEXT = 7,
++  _URC_CONTINUE_UNWIND = 8
++} _Unwind_Reason_Code;
++
++struct _Unwind_Exception;
++struct _Unwind_Context;
++
++extern "C" _Unwind_Reason_Code __gcc_personality_v0(int version, int actions,
++    uint64_t exception_class, struct _Unwind_Exception *ue_header,
++    struct _Unwind_Context *context) {
++  return _URC_CONTINUE_UNWIND;
++}
++
++#endif // __OHOS__
+diff --git a/src/llvm-project/compiler-rt/lib/sanitizer_common/CMakeLists.txt b/src/llvm-project/compiler-rt/lib/sanitizer_common/CMakeLists.txt
+--- a/src/llvm-project/compiler-rt/lib/sanitizer_common/CMakeLists.txt
++++ b/src/llvm-project/compiler-rt/lib/sanitizer_common/CMakeLists.txt
+@@ -45,6 +45,7 @@
+   sanitizer_type_traits.cpp
+   sanitizer_win.cpp
+   sanitizer_win_interception.cpp
++  sanitizer_gcc_personality_v0.cpp
+   )
+ 
+ set(SANITIZER_SOURCES
+diff --git a/src/bootstrap/src/core/build_steps/llvm.rs b/src/bootstrap/src/core/build_steps/llvm.rs
+--- a/src/bootstrap/src/core/build_steps/llvm.rs
++++ b/src/bootstrap/src/core/build_steps/llvm.rs
+@@ -762,6 +762,13 @@
+         None => (builder.cc(target), builder.cxx(target).unwrap()),
+     };
+ 
++    let (cc, cxx) = if target.contains("ohos") {
++        let sdk = std::path::Path::new("/opt/ohos-sdk/native/llvm/bin");
++        (sdk.join("clang"), sdk.join("clang++"))
++    } else {
++        (cc, cxx)
++    };
++
+     // If ccache is configured we inform the build a little differently how
+     // to invoke ccache while also invoking our compilers.
+     if use_compiler_launcher && let Some(ref ccache) = builder.config.ccache {
+@@ -801,7 +808,13 @@
+         cflags.push(s);
+     }
+     if target.contains("ohos") {
++        cflags.push(format!(" --target={target}"));
++        cflags.push(" --sysroot=/opt/ohos-sdk/native/sysroot");
+         cflags.push(" -D_LINUX_SYSINFO_H");
++        cflags.push(" -D_UAPI_LINUX_SOCKET_H");
++        cflags.push(" -fuse-ld=lld");
++        cflags.push(" -fno-emulated-tls");
++        cflags.push(" -gz=none");
+     }
+     if builder.config.llvm_clang_cl.is_some() {
+         cflags.push(format!(" --target={target}"));
+@@ -826,13 +839,25 @@
+         cxxflags.push(s);
+     }
+     if target.contains("ohos") {
++        cxxflags.push(format!(" --target={target}"));
++        cxxflags.push(" --sysroot=/opt/ohos-sdk/native/sysroot");
+         cxxflags.push(" -D_LINUX_SYSINFO_H");
++        cxxflags.push(" -D_UAPI_LINUX_SOCKET_H");
++        cxxflags.push(" -fuse-ld=lld");
++        cxxflags.push(" -fno-emulated-tls");
++        cxxflags.push(" -gz=none");
+     }
+     if builder.config.llvm_clang_cl.is_some() {
+         cxxflags.push(format!(" --target={target}"));
+     }
+ 
+     cfg.define("CMAKE_CXX_FLAGS", cxxflags);
++    if target.contains("ohos") {
++        cfg.define(
++            "CMAKE_ASM_FLAGS",
++            format!(" --target={target} --sysroot=/opt/ohos-sdk/native/sysroot -D_UAPI_LINUX_SOCKET_H -fuse-ld=lld"),
++        );
++    }
+     if let Some(ar) = builder.ar(target)
+         && ar.is_absolute()
+     {
+@@ -872,6 +897,9 @@
+     }
+ 
+     if target.contains("ohos") {
++        ldflags.push_all(format!(" --target={target}"));
++        ldflags.push_all(" --sysroot=/opt/ohos-sdk/native/sysroot");
++        ldflags.push_all(" -fuse-ld=lld");
+         ldflags.push_all("-Wl,--code-sign");
+     }
+ 
+@@ -1460,6 +1488,7 @@
+ 
+         if self.target.contains("ohos") {
+             cfg.define("COMPILER_RT_USE_BUILTINS_LIBRARY", "ON");
++            cfg.define("SANITIZER_AARCH64_39BIT_VA", "ON");
+         }
+ 
+         // On Darwin targets the sanitizer runtimes are build as universal binaries.
+diff --git a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.cpp b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.cpp
+--- a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.cpp
++++ b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.cpp
+@@ -307,6 +307,12 @@
+   unsigned struct_statvfs64_sz = sizeof(struct statvfs64);
+ #endif // SANITIZER_GLIBC
+ 
++#if SANITIZER_LINUX && !SANITIZER_GLIBC && !SANITIZER_ANDROID
++// musl-based Linux (OHOS, Alpine, etc.) — struct rlimit64 is available
++// via sys/resource.h (may be #define'd to struct rlimit on musl)
++unsigned struct_rlimit64_sz = sizeof(struct rlimit64);
++#endif
++
+ #if SANITIZER_LINUX && !SANITIZER_ANDROID
+   unsigned struct_timex_sz = sizeof(struct timex);
+   unsigned struct_msqid_ds_sz = sizeof(struct msqid_ds);
