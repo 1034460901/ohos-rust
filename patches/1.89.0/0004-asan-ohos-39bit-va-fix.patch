@@ -26,18 +26,20 @@ diff --git a/src/llvm-project/compiler-rt/lib/asan/asan_allocator.h b/src/llvm-p
  // Android needs to support 39, 42 and 48 bit VMA.
  const uptr kAllocatorSize  =  0x2000000000ULL;  // 128G.
  typedef VeryCompactSizeClassMap SizeClassMap;
-diff --git a/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h b/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h
---- a/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h
-+++ b/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h
-@@ -74,7 +74,7 @@
- #if defined(HWASAN_ALIASING_MODE)
-   static const uptr kSpaceSize = 1ULL << kAddressTagShift;
-   typedef __sanitizer::DefaultSizeClassMap SizeClassMap;
--#elif SANITIZER_LINUX && !SANITIZER_ANDROID
-+#elif SANITIZER_LINUX && !SANITIZER_ANDROID && !SANITIZER_OHOS
-   static const uptr kSpaceSize = 0x40000000000ULL;  // 4T.
-   typedef __sanitizer::DefaultSizeClassMap SizeClassMap;
- #else
+diff --git a/src/llvm-project/compiler-rt/lib/lsan/lsan_allocator.h b/src/llvm-project/compiler-rt/lib/lsan/lsan_allocator.h
+--- a/src/llvm-project/compiler-rt/lib/lsan/lsan_allocator.h
++++ b/src/llvm-project/compiler-rt/lib/lsan/lsan_allocator.h
+@@ -93,6 +93,10 @@
+ const uptr kAllocatorSpace = 0x600000000000ULL;
+ const uptr kAllocatorSize  = 0x40000000000ULL;  // 4T.
+ using LSanSizeClassMap = DefaultSizeClassMap;
++#  elif (SANITIZER_ANDROID || SANITIZER_OHOS) && defined(__aarch64__)
++const uptr kAllocatorSpace = 0x3000000000ULL;
++const uptr kAllocatorSize = 0x2000000000ULL;  // 128G.
++using LSanSizeClassMap = VeryCompactSizeClassMap;
+ #  else
+ const uptr kAllocatorSpace = 0x500000000000ULL;
+ const uptr kAllocatorSize = 0x40000000000ULL;  // 4T.
 diff --git a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_gcc_personality_v0.cpp b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_gcc_personality_v0.cpp
 new file mode 100644
 --- /dev/null
@@ -89,6 +91,28 @@ diff --git a/src/llvm-project/compiler-rt/lib/sanitizer_common/CMakeLists.txt b/
    )
  
  set(SANITIZER_SOURCES
+diff --git a/src/bootstrap/src/core/build_steps/llvm.rs b/src/bootstrap/src/core/build_steps/llvm.rs
+--- a/src/bootstrap/src/core/build_steps/llvm.rs
++++ b/src/bootstrap/src/core/build_steps/llvm.rs
+@@ -780,6 +780,8 @@
+         cflags.push(format!(" --target={target}"));
+         cflags.push(" --sysroot=/opt/ohos-sdk/native/sysroot");
+         cflags.push(" -D_LINUX_SYSINFO_H");
++        cflags.push(" -fno-emulated-tls");
++        cflags.push(" -gz=none");
+         cflags.push(" -D_UAPI_LINUX_SOCKET_H");
+         cflags.push(" -fuse-ld=lld");
+     }
+@@ -807,6 +809,9 @@
+         cxxflags.push(format!(" --target={target}"));
+         cxxflags.push(" --sysroot=/opt/ohos-sdk/native/sysroot");
+         cxxflags.push(" -D_LINUX_SYSINFO_H");
++        cxxflags.push(" -fno-emulated-tls");
++        cxxflags.push(" -gz=none");
++        cxxflags.push(" -D_UAPI_LINUX_SOCKET_H");
+         cxxflags.push(" -D_UAPI_LINUX_SOCKET_H");
+         cxxflags.push(" -fuse-ld=lld");
+     }
 diff --git a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.cpp b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.cpp
 --- a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.cpp
 +++ b/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.cpp
@@ -104,3 +128,16 @@ diff --git a/src/llvm-project/compiler-rt/lib/sanitizer_common/sanitizer_platfor
  #endif
  
  // Must go after undef _FILE_OFFSET_BITS.
+
+diff --git a/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h b/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h
+--- a/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h
++++ b/src/llvm-project/compiler-rt/lib/hwasan/hwasan_allocator.h
+@@ -74,7 +74,7 @@
+ #if defined(HWASAN_ALIASING_MODE)
+   static const uptr kSpaceSize = 1ULL << kAddressTagShift;
+   typedef __sanitizer::DefaultSizeClassMap SizeClassMap;
+-#elif SANITIZER_LINUX && !SANITIZER_ANDROID
++#elif SANITIZER_LINUX && !SANITIZER_ANDROID && !SANITIZER_OHOS
+   static const uptr kSpaceSize = 0x40000000000ULL;  // 4T.
+   typedef __sanitizer::DefaultSizeClassMap SizeClassMap;
+ #else
