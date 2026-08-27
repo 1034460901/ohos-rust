@@ -653,3 +653,56 @@ echo "  CCACHE_DIR: $CCACHE_DIR"
 echo ""
 echo "产物位置: $WORKDIR/rust-$PKG_VERSION-aarch64-unknown-linux-ohos.tar.gz"
 ls -lh "rust-$PKG_VERSION-aarch64-unknown-linux-ohos.tar.gz"
+
+# ========================================
+# Build Fingerprint（用于验证 CI vs 本地产物一致性）
+# ========================================
+echo ""
+echo "=== Build Fingerprint ==="
+
+# 输入指纹
+echo "[INPUTS]"
+echo "  source_version: $(cat "$SRC_DIR/version" 2>/dev/null || echo unknown)"
+echo "  source_tarball_sha256: $(sha256sum "$WORKDIR/rustc-$RUST_VERSION-src.tar.gz" 2>/dev/null | awk '{print $1}')"
+echo "  rust_version: $RUST_VERSION"
+echo "  channel: $CHANNEL"
+echo "  pkg_version: $PKG_VERSION"
+echo "  git_commit: $(cat "$SRC_DIR/git-commit-hash" 2>/dev/null || echo unknown)"
+
+# SDK 指纹
+echo "  ohos_sdk_version: $(cat /opt/ohos-sdk/oh-uni-package.json 2>/dev/null | python3 -c 'import sys,json; print(json.load(sys.stdin).get("version","unknown"))' 2>/dev/null || echo unknown)"
+echo "  ohos_sdk_clang: $(/opt/ohos-sdk/native/llvm/bin/clang --version 2>/dev/null | head -1 || echo unknown)"
+echo "  ohos_openssl_version: $(cat /opt/ohos-openssl/prelude/arm64-v8a/lib/ossl-modules/ 2>/dev/null || ls /opt/ohos-openssl/ 2>/dev/null | head -1 || echo unknown)"
+
+# Patch 指纹
+echo "  patches_applied:"
+for p in "$WORKDIR/patches/$RUST_VERSION"/*.patch; do
+    [ -f "$p" ] || continue
+    echo "    $(basename "$p"): $(sha256sum "$p" | awk '{print $1}')"
+done
+
+# 产物指纹
+echo ""
+echo "[OUTPUTS]"
+MAIN_TGZ="rust-$PKG_VERSION-aarch64-unknown-linux-ohos.tar.gz"
+echo "  $MAIN_TGZ: $(sha256sum "$MAIN_TGZ" 2>/dev/null | awk '{print $1}')"
+
+RA_TGZ="rust-analyzer-$PKG_VERSION-aarch64-unknown-linux-ohos.tar.gz"
+if [ -f "$RA_TGZ" ]; then
+    echo "  $RA_TGZ: $(sha256sum "$RA_TGZ" | awk '{print $1}')"
+fi
+
+# build/dist 中各组件的 hash
+if [ -d "$SRC_DIR/build/dist" ]; then
+    echo ""
+    echo "[COMPONENTS]"
+    cd "$SRC_DIR/build/dist"
+    for f in *.tar.gz; do
+        [ -f "$f" ] || continue
+        echo "  $f: $(sha256sum "$f" | awk '{print $1}')"
+    done
+    cd "$WORKDIR"
+fi
+
+echo ""
+echo "=== End Fingerprint ==="
