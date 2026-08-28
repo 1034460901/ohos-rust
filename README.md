@@ -101,15 +101,17 @@ sudo bash x86_64/scripts/sccache.sh
 **使用封装脚本：**
 
 ```bash
-# stable 1.95.0（使用 start_build.sh，默认版本，镜像加速）
+# stable 1.89.0
+RUST_VERSION=1.89.0 CHANNEL=stable CLEAN_BUILD=true bash start_build.sh
+
+# stable 1.95.0（start_build.sh 默认版本，镜像加速）
 CLEAN_BUILD=true bash start_build.sh
 
 # nightly 1.100.0（使用 start_nightly_build.sh）
 bash start_nightly_build.sh
-
-# stable 1.89.0（需要手动指定版本）
-RUST_VERSION=1.89.0 CHANNEL=stable CLEAN_BUILD=true bash x86_64/build.sh
 ```
+
+> **注意：** `start_build.sh` 默认使用 build.sh 的默认版本（1.100.0），构建 stable 需通过环境变量指定 `RUST_VERSION` 和 `CHANNEL`。`start_nightly_build.sh` 已内置 `CHANNEL=nightly`，默认版本 1.100.0。
 
 **直接调用 build.sh：**
 
