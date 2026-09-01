@@ -640,86 +640,97 @@ fi
 sync
 
 # ========================================
-# 去除发布件的 .codesign 节区
+# 去除发布件的 .codesign 节区 + 格式校验
 # 发布未签名件：安装时由 rustup 的 selfsign 钩子自动补签
-# 这解决了 brew rustup 的 patchelf 改写已签名文件导致 EPERM 的问题
-# 注意：rustup-init/rustup 自身保持签名（编译时 -Wl,--code-sign 仍生效）
+# 解决 brew rustup 的 patchelf 改写已签名文件导致 EPERM 的问题
 # ========================================
 echo "=== 去除发布件 .codesign 节区 ==="
-    OBJCOPY="/opt/ohos-sdk/native/llvm/bin/llvm-objcopy"
-    if [ ! -x "$OBJCOPY" ]; then
-        OBJCOPY=$(which llvm-objcopy 2>/dev/null || which objcopy 2>/dev/null)
-    fi
-    if [ -z "$OBJCOPY" ]; then
-        echo "错误: 未找到 llvm-objcopy 或 objcopy" >&2
-        exit 1
-    fi
+OBJCOPY="/opt/ohos-sdk/native/llvm/bin/llvm-objcopy"
+if [ ! -x "$OBJCOPY" ]; then
+    OBJCOPY=$(which llvm-objcopy 2>/dev/null || which objcopy 2>/dev/null)
+fi
+if [ -z "$OBJCOPY" ]; then
+    echo "错误: 未找到 llvm-objcopy 或 objcopy" >&2
+    exit 1
+fi
 
-    STRIP_COUNT=0
-    SKIP_COUNT=0
+STRIP_COUNT=0
+SKIP_COUNT=0
+FORMAT_ERRORS=0
 
-    # 处理 build/dist/ 中的所有 .tar.gz
-    cd "$SRC_DIR/build/dist/"
-    for tgz in *.tar.gz; do
-        [ -f "$tgz" ] || continue
-        # 只处理 tarball，不处理 install.sh 等
-        case "$tgz" in
-            *.tar.gz) ;;
-            *) continue ;;
-        esac
+# 去签名函数：解压 → strip .codesign → 用正确的包目录名重打包（无 ./ 前缀）
+strip_and_repack() {
+    local tgz="$1"
+    local tmpdir
+    tmpdir=$(mktemp -d)
+    tar -xzf "$tgz" -C "$tmpdir" 2>/dev/null
 
-        tmpdir=$(mktemp -d)
-        tar -xzf "$tgz" -C "$tmpdir" 2>/dev/null || { rm -rf "$tmpdir"; continue; }
-
-        # 查找所有 ELF 二进制并去除 .codesign
-        for elf in $(find "$tmpdir" -type f -exec file {} \; 2>/dev/null | grep -i 'ELF' | awk -F: '{print $1}'); do
-            if readelf -SW "$elf" 2>/dev/null | grep -q '\.codesign'; then
-                "$OBJCOPY" --remove-section .codesign "$elf" 2>/dev/null
-                STRIP_COUNT=$((STRIP_COUNT + 1))
-            else
-                SKIP_COUNT=$((SKIP_COUNT + 1))
-            fi
-        done
-
-        # 重新打包（保持原文件名）
-        rm -f "$tgz"
-        tar -czf "$tgz" -C "$tmpdir" .
+    # 找到包目录名（如 cargo-1.89.0-aarch64-unknown-linux-ohos）
+    local pkgdir
+    pkgdir=$(ls "$tmpdir" | head -1)
+    if [ -z "$pkgdir" ]; then
+        echo "    错误: 无法确定包目录名 for $(basename "$tgz")" >&2
         rm -rf "$tmpdir"
+        return 1
+    fi
+
+    # 去除所有 ELF 的 .codesign
+    for elf in $(find "$tmpdir" -type f -exec file {} \; 2>/dev/null | grep -i 'ELF' | awk -F: '{print $1}'); do
+        if readelf -SW "$elf" 2>/dev/null | grep -q '\.codesign'; then
+            "$OBJCOPY" --remove-section .codesign "$elf" 2>/dev/null
+            STRIP_COUNT=$((STRIP_COUNT + 1))
+        else
+            SKIP_COUNT=$((SKIP_COUNT + 1))
+        fi
     done
 
-    # 处理主产物（rust-$PKG_VERSION-*.tar.gz）
-    cd "$WORKDIR"
-    MAIN_TGZ="rust-$PKG_VERSION-aarch64-unknown-linux-ohos.tar.gz"
-    if [ -f "$MAIN_TGZ" ]; then
-        tmpdir=$(mktemp -d)
-        tar -xzf "$MAIN_TGZ" -C "$tmpdir" 2>/dev/null
-        for elf in $(find "$tmpdir" -type f -exec file {} \; 2>/dev/null | grep -i 'ELF' | awk -F: '{print $1}'); do
-            if readelf -SW "$elf" 2>/dev/null | grep -q '\.codesign'; then
-                "$OBJCOPY" --remove-section .codesign "$elf" 2>/dev/null
-            fi
-        done
-        rm -f "$MAIN_TGZ"
-        tar -czf "$MAIN_TGZ" -C "$tmpdir" .
-        rm -rf "$tmpdir"
-    fi
+    # 重新打包：使用包目录名而非 . （避免 ./ 前缀）
+    rm -f "$tgz"
+    (cd "$tmpdir" && tar -czf "$tgz" "$pkgdir")
+    rm -rf "$tmpdir"
 
-    # 处理 rust-analyzer 独立包
-    RA_TGZ="rust-analyzer-$PKG_VERSION-aarch64-unknown-linux-ohos.tar.gz"
-    if [ -f "$RA_TGZ" ]; then
-        tmpdir=$(mktemp -d)
-        tar -xzf "$RA_TGZ" -C "$tmpdir" 2>/dev/null
-        for elf in $(find "$tmpdir" -type f -exec file {} \; 2>/dev/null | grep -i 'ELF' | awk -F: '{print $1}'); do
-            if readelf -SW "$elf" 2>/dev/null | grep -q '\.codesign'; then
-                "$OBJCOPY" --remove-section .codesign "$elf" 2>/dev/null
-            fi
-        done
-        rm -f "$RA_TGZ"
-        tar -czf "$RA_TGZ" -C "$tmpdir" .
-        rm -rf "$tmpdir"
+    # 格式校验：检查 tarball 首行不以 ./ 开头
+    local first_entry
+    first_entry=$(tar -tzf "$tgz" 2>/dev/null | head -1)
+    if echo "$first_entry" | grep -q '^\./'; then
+        echo "    格式错误: $(basename "$tgz") 首行以 ./ 开头" >&2
+        FORMAT_ERRORS=$((FORMAT_ERRORS + 1))
     fi
+}
 
-    echo "  去签名: $STRIP_COUNT 个 ELF, $SKIP_COUNT 个已无签名"
-    echo "=== 去签名完成 ==="
+# 处理 build/dist/ 中的所有 .tar.gz
+cd "$SRC_DIR/build/dist/"
+for tgz in *.tar.gz; do
+    [ -f "$tgz" ] || continue
+    case "$tgz" in
+        *.tar.gz) ;;
+        *) continue ;;
+    esac
+    strip_and_repack "$tgz"
+done
+
+# 处理主产物
+cd "$WORKDIR"
+MAIN_TGZ="rust-$PKG_VERSION-aarch64-unknown-linux-ohos.tar.gz"
+if [ -f "$MAIN_TGZ" ]; then
+    strip_and_repack "$MAIN_TGZ"
+fi
+
+# 处理 rust-analyzer 独立包
+RA_TGZ="rust-analyzer-$PKG_VERSION-aarch64-unknown-linux-ohos.tar.gz"
+if [ -f "$RA_TGZ" ]; then
+    strip_and_repack "$RA_TGZ"
+fi
+
+echo "  去签名: $STRIP_COUNT 个 ELF, $SKIP_COUNT 个已无签名"
+
+# 格式校验门控
+if [ "$FORMAT_ERRORS" -gt 0 ]; then
+    echo "错误: $FORMAT_ERRORS 个 tarball 格式不正确（./ 前缀）" >&2
+    exit 1
+fi
+echo "  格式校验: 全部通过（无 ./ 前缀）"
+echo "=== 去签名完成 ==="
 
 echo "=== 构建完成 ==="
 echo ""
